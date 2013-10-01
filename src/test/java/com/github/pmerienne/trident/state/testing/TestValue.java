@@ -20,24 +20,23 @@ import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
+import org.apache.commons.lang.math.RandomUtils;
+
 public class TestValue {
 
 	private Double testDouble;
 	private String testString;
 	private List<Integer> testIntegerList = new ArrayList<Integer>();
+	private NestedObject nestedObject;
 
 	public TestValue() {
 	}
 
-	public TestValue(Double testDouble, String testString) {
-		this.testDouble = testDouble;
-		this.testString = testString;
-	}
-
-	public TestValue(Double testDouble, String testString, List<Integer> testIntegerList) {
+	public TestValue(Double testDouble, String testString, List<Integer> testIntegerList, NestedObject nestedObject) {
 		this.testDouble = testDouble;
 		this.testString = testString;
 		this.testIntegerList = testIntegerList;
+		this.nestedObject = nestedObject;
 	}
 
 	public Double getTestDouble() {
@@ -64,10 +63,19 @@ public class TestValue {
 		this.testIntegerList = testIntegerList;
 	}
 
+	public NestedObject getNestedObject() {
+		return nestedObject;
+	}
+
+	public void setNestedObject(NestedObject nestedObject) {
+		this.nestedObject = nestedObject;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		result = prime * result + ((nestedObject == null) ? 0 : nestedObject.hashCode());
 		result = prime * result + ((testDouble == null) ? 0 : testDouble.hashCode());
 		result = prime * result + ((testIntegerList == null) ? 0 : testIntegerList.hashCode());
 		result = prime * result + ((testString == null) ? 0 : testString.hashCode());
@@ -83,6 +91,11 @@ public class TestValue {
 		if (getClass() != obj.getClass())
 			return false;
 		TestValue other = (TestValue) obj;
+		if (nestedObject == null) {
+			if (other.nestedObject != null)
+				return false;
+		} else if (!nestedObject.equals(other.nestedObject))
+			return false;
 		if (testDouble == null) {
 			if (other.testDouble != null)
 				return false;
@@ -101,12 +114,80 @@ public class TestValue {
 		return true;
 	}
 
+	@Override
+	public String toString() {
+		return "TestValue [testDouble=" + testDouble + ", testString=" + testString + ", testIntegerList=" + testIntegerList + ", nestedObject=" + nestedObject + "]";
+	}
+
 	public static TestValue random() {
-		TestValue testValue = new TestValue(new Random().nextDouble(), UUID.randomUUID().toString());
+		TestValue testValue = new TestValue(RandomUtils.nextDouble(), UUID.randomUUID().toString(), new ArrayList<Integer>(), new NestedObject());
 		for (int i = 0; i < 7; i++) {
 			testValue.getTestIntegerList().add(new Random().nextInt());
 		}
 		return testValue;
 	}
 
+	public static class NestedObject {
+
+		private Double testDouble;
+		private String testString;
+
+		public NestedObject() {
+			this.testDouble = RandomUtils.nextDouble();
+			this.testString = UUID.randomUUID().toString();
+		}
+
+		public Double getTestDouble() {
+			return testDouble;
+		}
+
+		public void setTestDouble(Double testDouble) {
+			this.testDouble = testDouble;
+		}
+
+		public String getTestString() {
+			return testString;
+		}
+
+		public void setTestString(String testString) {
+			this.testString = testString;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((testDouble == null) ? 0 : testDouble.hashCode());
+			result = prime * result + ((testString == null) ? 0 : testString.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			NestedObject other = (NestedObject) obj;
+			if (testDouble == null) {
+				if (other.testDouble != null)
+					return false;
+			} else if (!testDouble.equals(other.testDouble))
+				return false;
+			if (testString == null) {
+				if (other.testString != null)
+					return false;
+			} else if (!testString.equals(other.testString))
+				return false;
+			return true;
+		}
+
+		@Override
+		public String toString() {
+			return "NestedObject [testDouble=" + testDouble + ", testString=" + testString + "]";
+		}
+
+	}
 }
