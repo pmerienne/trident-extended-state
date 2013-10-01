@@ -18,6 +18,8 @@ package com.github.pmerienne.trident.state.redis;
 import java.util.List;
 import java.util.Map;
 
+import com.github.pmerienne.trident.state.serializer.KryoValueSerializer;
+
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;

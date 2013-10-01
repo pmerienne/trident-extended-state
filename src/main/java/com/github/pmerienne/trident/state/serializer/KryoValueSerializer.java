@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.pmerienne.trident.state.redis;
+package com.github.pmerienne.trident.state.serializer;
 
 import java.io.ByteArrayOutputStream;
 
@@ -24,7 +24,7 @@ import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 import com.github.pmerienne.trident.state.util.StringHexUtil;
 
-public class KryoValueSerializer implements Serializer<Object> {
+public class KryoValueSerializer<T> implements Serializer<T> {
 
 	private static final long serialVersionUID = 1689053104987281146L;
 
@@ -35,7 +35,7 @@ public class KryoValueSerializer implements Serializer<Object> {
 	}
 
 	@Override
-	public byte[] serialize(Object obj) {
+	public byte[] serialize(T obj) {
 		ByteArrayOutputStream stream = new ByteArrayOutputStream();
 		Output output = new Output(stream);
 
@@ -50,13 +50,14 @@ public class KryoValueSerializer implements Serializer<Object> {
 	}
 
 	@Override
-	public Object deserialize(byte[] bytes) {
+	@SuppressWarnings("unchecked")
+	public T deserialize(byte[] bytes) {
 		// Trick to avoid serialization problem!
 		String data = new String(bytes);
 		bytes = StringHexUtil.fromHexString(data);
 
 		Input input = new Input(bytes);
 		Object obj = this.kryo.readClassAndObject(input);
-		return obj;
+		return (T) obj;
 	}
 }

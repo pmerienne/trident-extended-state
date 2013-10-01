@@ -1,11 +1,12 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>com.github.pmerienne</groupId>
-  <artifactId>trident-extended-state</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
-  
-  
-  
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.github.pmerienne</groupId>
+	<artifactId>trident-extended-state</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+
+
+
 	<licenses>
 		<license>
 			<name>Apache 2</name>
@@ -37,9 +38,9 @@
 		<mockito.version>1.9.0</mockito.version>
 		<slf4j.version>1.6.3</slf4j.version>
 	</properties>
-  
-  
-  
+
+
+
 	<repositories>
 		<!-- For storm -->
 		<repository>
@@ -159,6 +160,12 @@
 			<version>${jedis.version}</version>
 		</dependency>
 
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<version>2.2.4</version>
+		</dependency>
+
 		<!-- Test -->
 		<dependency>
 			<groupId>junit</groupId>
@@ -170,6 +177,12 @@
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-all</artifactId>
 			<version>${mockito.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.easytesting</groupId>
+			<artifactId>fest-assert</artifactId>
+			<version>1.4</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -249,8 +262,10 @@
 			<id>github-release</id>
 
 			<properties>
-				<!--Trick to deploy releases (using mvn release:perform) to the local file system. The release is actually performed from target/checkout, which is why we need those ../../ . Notice that after deployment, 
-					you should commit and push to the git repository. -->
+				<!--Trick to deploy releases (using mvn release:perform) to the local 
+					file system. The release is actually performed from target/checkout, which 
+					is why we need those ../../ . Notice that after deployment, you should commit 
+					and push to the git repository. -->
 				<altDeploymentRepository>release-repo::default::file:../../releases</altDeploymentRepository>
 			</properties>
 
