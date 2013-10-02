@@ -16,25 +16,24 @@
 package com.github.pmerienne.trident.state.serializer;
 
 import storm.trident.state.Serializer;
-import flexjson.JSONDeserializer;
-import flexjson.JSONSerializer;
+
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 
 public class JsonValueSerializer<T> implements Serializer<T> {
 
 	private static final long serialVersionUID = -2910589120089169978L;
 
-	private JSONSerializer serializer = new JSONSerializer();
-	private JSONDeserializer<T> deserializer = new JSONDeserializer<T>();
-
 	@Override
 	public byte[] serialize(T obj) {
-		String json = this.serializer.deepSerialize(obj);
+		String json = JSON.toJSONString(obj, SerializerFeature.WriteClassName);
 		return json.getBytes();
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public T deserialize(byte[] bytes) {
 		String json = new String(bytes);
-		return this.deserializer.deserialize(json);
+		return (T) JSON.parse(json);
 	}
 }
