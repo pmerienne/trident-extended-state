@@ -20,8 +20,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
-import org.apache.commons.lang.math.RandomUtils;
-
 public class TestValue {
 
 	private Double testDouble;
