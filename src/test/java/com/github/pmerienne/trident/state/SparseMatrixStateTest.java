@@ -17,6 +17,11 @@ package com.github.pmerienne.trident.state;
 
 import static org.fest.assertions.Assertions.assertThat;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
+import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.math.RandomUtils;
 import org.junit.Test;
 
@@ -94,7 +99,7 @@ public abstract class SparseMatrixStateTest {
 	public void should_set_column() {
 		// Given
 		long i = RandomUtils.nextInt();
-		SparseVector<TestValue> expectedColumn = new SparseVector<TestValue>();
+		SparseVector<TestValue> expectedColumn = new HashMapSparseVector<TestValue>();
 		expectedColumn.set(RandomUtils.nextInt(), TestValue.random());
 		expectedColumn.set(RandomUtils.nextInt(), TestValue.random());
 		expectedColumn.set(RandomUtils.nextInt(), TestValue.random());
@@ -104,14 +109,14 @@ public abstract class SparseMatrixStateTest {
 
 		// Then
 		SparseVector<TestValue> actualColumn = this.state.getColumn(i);
-		assertThat(actualColumn).isEqualTo(expectedColumn);
+		assertThat(new SparseVectorComparator<TestValue>().areEquals(actualColumn, expectedColumn)).isTrue();
 	}
 
 	@Test
 	public void should_set_row() {
 		// Given
 		long j = RandomUtils.nextInt();
-		SparseVector<TestValue> expectedRow = new SparseVector<TestValue>();
+		SparseVector<TestValue> expectedRow = new HashMapSparseVector<TestValue>();
 		expectedRow.set(RandomUtils.nextInt(), TestValue.random());
 		expectedRow.set(RandomUtils.nextInt(), TestValue.random());
 		expectedRow.set(RandomUtils.nextInt(), TestValue.random());
@@ -121,6 +126,44 @@ public abstract class SparseMatrixStateTest {
 
 		// Then
 		SparseVector<TestValue> actualRow = this.state.getRow(j);
-		assertThat(actualRow).isEqualTo(expectedRow);
+		assertThat(new SparseVectorComparator<TestValue>().areEquals(actualRow, expectedRow)).isTrue();
+	}
+
+	public static class HashMapSparseVector<T> implements SparseVector<T> {
+
+		private static final long serialVersionUID = 1L;
+
+		private Map<Long, T> values = new HashMap<Long, T>();
+
+		public T get(long i) {
+			return this.values.get(i);
+		}
+
+		public void set(long i, T value) {
+			this.values.put(i, value);
+		}
+
+		public Set<Long> indexes() {
+			return this.values.keySet();
+		}
+
+		@Override
+		public String toString() {
+			return "SparseVector [values=" + values + "]";
+		}
+	}
+
+	private static class SparseVectorComparator<T> {
+
+		public boolean areEquals(SparseVector<T> v1, SparseVector<T> v2) {
+
+			EqualsBuilder eq = new EqualsBuilder();
+			eq.append(v1.indexes(), v2.indexes());
+			for (Long index : v1.indexes()) {
+				eq.append(v1.get(index), v2.get(index));
+			}
+
+			return eq.isEquals();
+		}
 	}
 }

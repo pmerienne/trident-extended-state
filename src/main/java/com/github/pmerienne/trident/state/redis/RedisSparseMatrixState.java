@@ -21,13 +21,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
+
 import redis.clients.jedis.Jedis;
-import redis.clients.jedis.Tuple;
+import storm.trident.state.Serializer;
 import storm.trident.state.State;
 import storm.trident.state.StateFactory;
 import backtype.storm.task.IMetricsContext;
 
 import com.github.pmerienne.trident.state.SparseMatrixState;
+import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Sets;
 
 public class RedisSparseMatrixState<T> extends AbstractRedisState implements SparseMatrixState<T> {
 
@@ -46,17 +51,15 @@ public class RedisSparseMatrixState<T> extends AbstractRedisState implements Spa
 	@SuppressWarnings("unchecked")
 	public T get(long i, long j) {
 		Jedis jedis = this.pool.getResource();
-
 		String rowKey = this.getRowKey(j);
-		Set<String> values = jedis.zrangeByScore(rowKey, (double) i, (double) i);
+		String serializedValue = jedis.hget(rowKey, Long.toString(i));
 
-		if (values == null || values.isEmpty()) {
+		if (StringUtils.isBlank(serializedValue)) {
 			return null;
-		} else {
-			String serializedValue = values.iterator().next();
-			ValueWrapper<T> wrappedValue = (ValueWrapper<T>) this.serializer.deserialize(serializedValue.getBytes());
-			return wrappedValue.value;
 		}
+
+		T value = (T) this.serializer.deserialize(serializedValue.getBytes());
+		return value;
 	}
 
 	@Override
@@ -70,34 +73,25 @@ public class RedisSparseMatrixState<T> extends AbstractRedisState implements Spa
 
 	protected void set(String key, long index, T value) {
 		Jedis jedis = this.pool.getResource();
-
-		// Remove previous value
-		jedis.zremrangeByScore(key, (double) index, (double) index);
+		String field = Long.toString(index);
 
 		if (value != null) {
-			// Add new value
-			byte[] serializedValue = this.serializer.serialize(new ValueWrapper<T>(index, value));
-			jedis.zadd(key, (double) index, new String(serializedValue));
+			byte[] serializedValue = this.serializer.serialize(value);
+			jedis.hset(key, field, new String(serializedValue));
+		} else {
+			jedis.hdel(key, field);
 		}
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public SparseVector<T> getColumn(long i) {
 		Jedis jedis = this.pool.getResource();
 
 		String columnKey = this.getColumnKey(i);
-		Set<Tuple> indexedValues = jedis.zrangeByScoreWithScores(columnKey, "0", "+inf");
 
-		SparseVector<T> column = new SparseVector<T>();
-		if (indexedValues != null) {
-			for (Tuple indexedValue : indexedValues) {
-				ValueWrapper<T> wrappedValue = (ValueWrapper<T>) this.serializer.deserialize(indexedValue.getBinaryElement());
-				column.set((long) indexedValue.getScore(), wrappedValue.value);
-			}
+		Map<String, String> serializedResults = jedis.hgetAll(columnKey);
 
-		}
-
+		SparseVector<T> column = new RedisSparseVector<T>(serializedResults, serializer);
 		return column;
 	}
 
@@ -108,33 +102,23 @@ public class RedisSparseMatrixState<T> extends AbstractRedisState implements Spa
 
 		jedis.del(columnKey);
 
-		Map<Double, String> scoreMembers = new HashMap<Double, String>();
-		ValueWrapper<T> wrappedValue;
+		Map<String, String> values = new HashMap<String, String>();
 		for (long index : column.indexes()) {
-			wrappedValue = new ValueWrapper<T>(index, column.get(index));
-			scoreMembers.put((double) index, new String(this.serializer.serialize(wrappedValue)));
+			values.put(Long.toString(index), new String(this.serializer.serialize(column.get(index))));
 		}
 
-		jedis.zadd(columnKey, scoreMembers);
+		jedis.hmset(columnKey, values);
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public SparseVector<T> getRow(long j) {
 		Jedis jedis = this.pool.getResource();
 
 		String rowKey = this.getRowKey(j);
-		Set<Tuple> indexedValues = jedis.zrangeByScoreWithScores(rowKey, "0", "+inf");
 
-		SparseVector<T> row = new SparseVector<T>();
-		if (indexedValues != null) {
-			for (Tuple indexedValue : indexedValues) {
-				ValueWrapper<T> wrappedValue = (ValueWrapper<T>) this.serializer.deserialize(indexedValue.getBinaryElement());
-				row.set((long) indexedValue.getScore(), wrappedValue.value);
-			}
+		Map<String, String> serializedResults = jedis.hgetAll(rowKey);
 
-		}
-
+		SparseVector<T> row = new RedisSparseVector<T>(serializedResults, serializer);
 		return row;
 	}
 
@@ -145,14 +129,12 @@ public class RedisSparseMatrixState<T> extends AbstractRedisState implements Spa
 
 		jedis.del(rowKey);
 
-		Map<Double, String> scoreMembers = new HashMap<Double, String>();
-		ValueWrapper<T> wrappedValue;
+		Map<String, String> values = new HashMap<String, String>();
 		for (long index : row.indexes()) {
-			wrappedValue = new ValueWrapper<T>(index, row.get(index));
-			scoreMembers.put((double) index, new String(this.serializer.serialize(wrappedValue)));
+			values.put(Long.toString(index), new String(this.serializer.serialize(row.get(index))));
 		}
 
-		jedis.zadd(rowKey, scoreMembers);
+		jedis.hmset(rowKey, values);
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -202,53 +184,53 @@ public class RedisSparseMatrixState<T> extends AbstractRedisState implements Spa
 		}
 	}
 
-	private static class ValueWrapper<T> {
+	protected static class RedisSparseVector<T> implements SparseVector<T> {
 
-		public long index;
-		public T value;
+		private static final long serialVersionUID = 3559058694806143009L;
 
-		@SuppressWarnings("unused")
-		public ValueWrapper() {
+		private Map<String, String> values = new HashMap<String, String>();
+		protected Serializer<Object> serializer;
+
+		public RedisSparseVector() {
 		}
 
-		public ValueWrapper(long index, T value) {
-			this.index = index;
-			this.value = value;
-		}
-
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + (int) (index ^ (index >>> 32));
-			result = prime * result + ((value == null) ? 0 : value.hashCode());
-			return result;
-		}
-
-		@SuppressWarnings("unchecked")
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			ValueWrapper<T> other = (ValueWrapper<T>) obj;
-			if (index != other.index)
-				return false;
-			if (value == null) {
-				if (other.value != null)
-					return false;
-			} else if (!value.equals(other.value))
-				return false;
-			return true;
+		public RedisSparseVector(Map<String, String> values, Serializer<Object> serializer) {
+			this.values = values;
+			this.serializer = serializer;
 		}
 
 		@Override
-		public String toString() {
-			return "ValueWrapper [index=" + index + ", value=" + value + "]";
+		public T get(long i) {
+			String serializedValue = this.values.get(Long.toString(i));
+			if (StringUtils.isBlank(serializedValue)) {
+				return null;
+			} else {
+				return (T) this.serializer.deserialize(serializedValue.getBytes());
+			}
 		}
 
+		@Override
+		public void set(long i, T value) {
+			String key = Long.toString(i);
+
+			if (value != null) {
+				String serializedValue = new String(this.serializer.serialize(value));
+				this.values.put(key, serializedValue);
+			} else {
+				this.values.remove(key);
+			}
+		}
+
+		@Override
+		public Set<Long> indexes() {
+			return Sets.newTreeSet(Iterables.transform(this.values.keySet(), new Function<String, Long>() {
+				@Override
+				public Long apply(String string) {
+					return Long.parseLong(string);
+				}
+
+			}));
+		}
 	}
+
 }

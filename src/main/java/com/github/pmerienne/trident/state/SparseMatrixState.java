@@ -15,8 +15,7 @@
  */
 package com.github.pmerienne.trident.state;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.io.Serializable;
 import java.util.Set;
 
 public interface SparseMatrixState<T> {
@@ -33,51 +32,13 @@ public interface SparseMatrixState<T> {
 
 	void setRow(long i, SparseVector<T> row);
 
-	public static class SparseVector<T> {
+	public static interface SparseVector<T> extends Serializable {
 
-		private Map<Long, T> values = new HashMap<Long, T>();
+		T get(long i);
 
-		public T get(long i) {
-			return this.values.get(i);
-		}
+		void set(long i, T value);
 
-		public void set(long i, T value) {
-			this.values.put(i, value);
-		}
-
-		public Set<Long> indexes() {
-			return this.values.keySet();
-		}
-
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + ((values == null) ? 0 : values.hashCode());
-			return result;
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			SparseVector other = (SparseVector) obj;
-			if (values == null) {
-				if (other.values != null)
-					return false;
-			} else if (!values.equals(other.values))
-				return false;
-			return true;
-		}
-
-		@Override
-		public String toString() {
-			return "SparseVector [values=" + values + "]";
-		}
+		Set<Long> indexes();
 
 	}
 }
