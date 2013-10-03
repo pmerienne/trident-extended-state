@@ -34,7 +34,7 @@ import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 
-public class RedisSparseMatrixState<T> extends AbstractRedisState implements SparseMatrixState<T> {
+public class RedisSparseMatrixState<T> extends AbstractRedisState<T> implements SparseMatrixState<T> {
 
 	private final static String COLUMN_KEY = "column";
 	private final static String ROW_KEY = "row";
@@ -48,7 +48,6 @@ public class RedisSparseMatrixState<T> extends AbstractRedisState implements Spa
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public T get(long i, long j) {
 		Jedis jedis = this.pool.getResource();
 		String rowKey = this.getRowKey(j);
@@ -58,7 +57,7 @@ public class RedisSparseMatrixState<T> extends AbstractRedisState implements Spa
 			return null;
 		}
 
-		T value = (T) this.serializer.deserialize(serializedValue.getBytes());
+		T value = this.serializer.deserialize(serializedValue.getBytes());
 		return value;
 	}
 
@@ -189,12 +188,12 @@ public class RedisSparseMatrixState<T> extends AbstractRedisState implements Spa
 		private static final long serialVersionUID = 3559058694806143009L;
 
 		private Map<String, String> values = new HashMap<String, String>();
-		protected Serializer<Object> serializer;
+		protected Serializer<T> serializer;
 
 		public RedisSparseVector() {
 		}
 
-		public RedisSparseVector(Map<String, String> values, Serializer<Object> serializer) {
+		public RedisSparseVector(Map<String, String> values, Serializer<T> serializer) {
 			this.values = values;
 			this.serializer = serializer;
 		}
@@ -205,7 +204,7 @@ public class RedisSparseMatrixState<T> extends AbstractRedisState implements Spa
 			if (StringUtils.isBlank(serializedValue)) {
 				return null;
 			} else {
-				return (T) this.serializer.deserialize(serializedValue.getBytes());
+				return this.serializer.deserialize(serializedValue.getBytes());
 			}
 		}
 

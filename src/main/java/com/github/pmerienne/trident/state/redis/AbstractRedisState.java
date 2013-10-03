@@ -18,16 +18,16 @@ package com.github.pmerienne.trident.state.redis;
 import java.util.List;
 import java.util.Map;
 
-import com.github.pmerienne.trident.state.serializer.KryoValueSerializer;
-
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.Protocol;
 import storm.trident.state.Serializer;
-import storm.trident.state.State;
 
-public abstract class AbstractRedisState implements State {
+import com.github.pmerienne.trident.state.ExtendedState;
+import com.github.pmerienne.trident.state.serializer.KryoValueSerializer;
+
+public abstract class AbstractRedisState<T> implements ExtendedState<T> {
 
 	public final static String DEFAULT_HOST = "localhost";
 	public final static int DEFAULT_PORT = 6379;
@@ -43,7 +43,7 @@ public abstract class AbstractRedisState implements State {
 	protected int port;
 	protected JedisPool pool;
 
-	protected Serializer<Object> serializer = new KryoValueSerializer();
+	protected Serializer<T> serializer = new KryoValueSerializer<T>();
 
 	public AbstractRedisState(String id, String host, int port) {
 		this.id = id;

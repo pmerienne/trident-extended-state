@@ -28,7 +28,7 @@ import storm.trident.state.State;
  * @param <E>
  *            the type of elements maintained by this set
  */
-public interface SetState<E> extends State {
+public interface SetState<E> extends ExtendedState<E> {
 
 	/**
 	 * Adds the specified element to this set if it is not already present.

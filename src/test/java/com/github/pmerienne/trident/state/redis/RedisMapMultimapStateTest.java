@@ -30,6 +30,6 @@ public class RedisMapMultimapStateTest extends MapMultimapStateTest {
 
 	@After
 	public void cleanup() {
-		((AbstractRedisState) this.state).flushAll();
+		((AbstractRedisState<?>) this.state).flushAll();
 	}
 }

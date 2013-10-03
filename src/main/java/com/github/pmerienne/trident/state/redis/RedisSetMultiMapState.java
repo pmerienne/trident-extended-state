@@ -26,7 +26,7 @@ import backtype.storm.task.IMetricsContext;
 
 import com.github.pmerienne.trident.state.SetMultiMapState;
 
-public class RedisSetMultiMapState<K, V> extends AbstractRedisState implements SetMultiMapState<K, V> {
+public class RedisSetMultiMapState<K, V> extends AbstractRedisState<V> implements SetMultiMapState<K, V> {
 
 	public RedisSetMultiMapState(String id) {
 		super(id);
@@ -73,7 +73,6 @@ public class RedisSetMultiMapState<K, V> extends AbstractRedisState implements S
 
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public Set<V> get(K key) {
 		Set<V> results = new HashSet<V>();
@@ -86,7 +85,7 @@ public class RedisSetMultiMapState<K, V> extends AbstractRedisState implements S
 				if (result == null || result.isEmpty()) {
 					results.add(null);
 				} else {
-					results.add((V) this.serializer.deserialize(result.getBytes()));
+					results.add(this.serializer.deserialize(result.getBytes()));
 				}
 			}
 		} finally {

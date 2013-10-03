@@ -31,7 +31,7 @@ import storm.trident.state.State;
  * @param <V>
  *            the type of values
  */
-public interface MapMultimapState<K1, K2, V> extends State {
+public interface MapMultimapState<K1, K2, V> extends ExtendedState<V> {
 
 	/**
 	 * Add a given value at key, subkey.

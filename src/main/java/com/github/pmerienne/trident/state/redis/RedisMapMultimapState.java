@@ -19,13 +19,17 @@ import java.util.HashMap;
 import java.util.Map;
 
 import redis.clients.jedis.Jedis;
+import storm.trident.state.Serializer;
 import storm.trident.state.State;
 import storm.trident.state.StateFactory;
 import backtype.storm.task.IMetricsContext;
 
 import com.github.pmerienne.trident.state.MapMultimapState;
+import com.github.pmerienne.trident.state.serializer.KryoValueSerializer;
 
-public class RedisMapMultimapState<K1, K2, V> extends AbstractRedisState implements MapMultimapState<K1, K2, V> {
+public class RedisMapMultimapState<K1, K2, V> extends AbstractRedisState<V> implements MapMultimapState<K1, K2, V> {
+
+	private Serializer<K2> keySerializer = new KryoValueSerializer<K2>();
 
 	public RedisMapMultimapState(String id) {
 		super(id);
@@ -49,7 +53,7 @@ public class RedisMapMultimapState<K1, K2, V> extends AbstractRedisState impleme
 		long result;
 		try {
 			String stringKey = this.generateKey(key);
-			String stringSubKey = new String(this.serializer.serialize(subkey));
+			String stringSubKey = new String(this.keySerializer.serialize(subkey));
 			result = jedis.hset(stringKey, stringSubKey, new String(this.serializer.serialize(value)));
 		} finally {
 			this.pool.returnResource(jedis);
@@ -58,17 +62,16 @@ public class RedisMapMultimapState<K1, K2, V> extends AbstractRedisState impleme
 		return result >= 1;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public V get(K1 key, K2 subkey) {
 		Jedis jedis = this.pool.getResource();
 		V result = null;
 		try {
 			String stringKey = this.generateKey(key);
-			String stringSubKey = new String(this.serializer.serialize(subkey));
+			String stringSubKey = new String(this.keySerializer.serialize(subkey));
 			String resultAsString = jedis.hget(stringKey, stringSubKey);
 			if (resultAsString != null && !resultAsString.isEmpty()) {
-				result = (V) this.serializer.deserialize(resultAsString.getBytes());
+				result = this.serializer.deserialize(resultAsString.getBytes());
 			}
 		} finally {
 			this.pool.returnResource(jedis);
@@ -77,7 +80,6 @@ public class RedisMapMultimapState<K1, K2, V> extends AbstractRedisState impleme
 		return result;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public Map<K2, V> getAll(K1 key) {
 		Map<K2, V> results = new HashMap<K2, V>();
@@ -90,8 +92,8 @@ public class RedisMapMultimapState<K1, K2, V> extends AbstractRedisState impleme
 			K2 subkey;
 			V value;
 			for (String stringSubkey : resultsAsString.keySet()) {
-				subkey = (K2) this.serializer.deserialize(stringSubkey.getBytes());
-				value = (V) this.serializer.deserialize(resultsAsString.get(stringSubkey).getBytes());
+				subkey = this.keySerializer.deserialize(stringSubkey.getBytes());
+				value = this.serializer.deserialize(resultsAsString.get(stringSubkey).getBytes());
 				results.put(subkey, value);
 			}
 

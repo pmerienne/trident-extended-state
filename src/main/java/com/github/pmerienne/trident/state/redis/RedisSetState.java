@@ -27,7 +27,7 @@ import backtype.storm.task.IMetricsContext;
 
 import com.github.pmerienne.trident.state.SetState;
 
-public class RedisSetState<T> extends AbstractRedisState implements SetState<T> {
+public class RedisSetState<T> extends AbstractRedisState<T> implements SetState<T> {
 
 	public RedisSetState(String id) {
 		super(id);
@@ -81,7 +81,6 @@ public class RedisSetState<T> extends AbstractRedisState implements SetState<T> 
 		return result >= 1;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public Set<T> get() {
 		Set<T> results = new HashSet<T>();
@@ -94,7 +93,7 @@ public class RedisSetState<T> extends AbstractRedisState implements SetState<T> 
 				if (result == null || result.isEmpty()) {
 					results.add(null);
 				} else {
-					results.add((T) this.serializer.deserialize(result.getBytes()));
+					results.add(this.serializer.deserialize(result.getBytes()));
 				}
 			}
 		} finally {

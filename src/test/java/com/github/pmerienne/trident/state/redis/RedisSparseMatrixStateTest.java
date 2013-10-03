@@ -30,6 +30,6 @@ public class RedisSparseMatrixStateTest extends SparseMatrixStateTest {
 
 	@After
 	public void cleanup() {
-		((AbstractRedisState) this.state).flushAll();
+		((AbstractRedisState<?>) this.state).flushAll();
 	}
 }

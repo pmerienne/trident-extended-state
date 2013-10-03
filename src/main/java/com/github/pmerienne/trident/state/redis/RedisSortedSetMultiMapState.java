@@ -28,7 +28,7 @@ import backtype.storm.task.IMetricsContext;
 
 import com.github.pmerienne.trident.state.SortedSetMultiMapState;
 
-public class RedisSortedSetMultiMapState<K, V> extends AbstractRedisState implements SortedSetMultiMapState<K, V> {
+public class RedisSortedSetMultiMapState<K, V> extends AbstractRedisState<V> implements SortedSetMultiMapState<K, V> {
 
 	public RedisSortedSetMultiMapState(String id) {
 		super(id);
@@ -75,7 +75,6 @@ public class RedisSortedSetMultiMapState<K, V> extends AbstractRedisState implem
 
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public List<ScoredValue<V>> getSorted(K key, int count) {
 		List<ScoredValue<V>> scoredValues = new ArrayList<ScoredValue<V>>();
@@ -85,7 +84,7 @@ public class RedisSortedSetMultiMapState<K, V> extends AbstractRedisState implem
 			String stringKey = this.generateKey(key);
 			Set<Tuple> results = jedis.zrevrangeWithScores(stringKey, 0, count - 1);
 			for (Tuple result : results) {
-				scoredValues.add(new ScoredValue(result.getScore(), this.serializer.deserialize(result.getBinaryElement())));
+				scoredValues.add(new ScoredValue<V>(result.getScore(), this.serializer.deserialize(result.getBinaryElement())));
 			}
 		} finally {
 			this.pool.returnResource(jedis);

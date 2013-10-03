@@ -26,7 +26,7 @@ import storm.trident.state.ValueUpdater;
 import storm.trident.state.map.MapState;
 import backtype.storm.task.IMetricsContext;
 
-public class RedisMapState<T> extends AbstractRedisState implements MapState<T> {
+public class RedisMapState<T> extends AbstractRedisState<T> implements MapState<T> {
 
 	public RedisMapState(String id) {
 		super(id);
@@ -44,7 +44,6 @@ public class RedisMapState<T> extends AbstractRedisState implements MapState<T> 
 	public void commit(Long txid) {
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public List<T> multiGet(List<List<Object>> keys) {
 		List<T> results = new ArrayList<T>();
@@ -63,7 +62,7 @@ public class RedisMapState<T> extends AbstractRedisState implements MapState<T> 
 				if (result == null || result.isEmpty()) {
 					results.add(null);
 				} else {
-					results.add((T) this.serializer.deserialize(result.getBytes()));
+					results.add(this.serializer.deserialize(result.getBytes()));
 				}
 			}
 		} finally {

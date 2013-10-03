@@ -30,6 +30,6 @@ public class RedisSortedSetMultiMapStateTest extends SortedSetMultiMapStateTest 
 
 	@After
 	public void cleanup() {
-		((AbstractRedisState) this.state).flushAll();
+		((AbstractRedisState<?>) this.state).flushAll();
 	}
 }

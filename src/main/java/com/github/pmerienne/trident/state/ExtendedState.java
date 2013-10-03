@@ -13,23 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.pmerienne.trident.state.redis;
+package com.github.pmerienne.trident.state;
 
-import org.junit.After;
-import org.junit.Before;
+import storm.trident.state.State;
 
-import com.github.pmerienne.trident.state.SetStateTest;
-import com.github.pmerienne.trident.state.testing.TestValue;
+public interface ExtendedState<T> extends State {
 
-public class RedisSetStateTest extends SetStateTest {
-
-	@Before
-	public void setup() {
-		this.state = new RedisSetState<TestValue>("test");
-	}
-
-	@After
-	public void cleanup() {
-		((AbstractRedisState<?>) this.state).flushAll();
-	}
 }

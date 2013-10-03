@@ -31,7 +31,7 @@ import storm.trident.state.State;
  * @param <V>
  *            the type of values
  */
-public interface SetMultiMapState<K, V> extends State {
+public interface SetMultiMapState<K, V> extends ExtendedState<V> {
 
 	/**
 	 * Returns the numbers of values which are mapped to a given key
