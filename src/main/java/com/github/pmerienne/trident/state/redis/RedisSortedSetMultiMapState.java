@@ -34,8 +34,8 @@ public class RedisSortedSetMultiMapState<K, V> extends AbstractRedisState<V> imp
 		super(id);
 	}
 
-	public RedisSortedSetMultiMapState(String id, String host, int port) {
-		super(id, host, port);
+	public RedisSortedSetMultiMapState(String id, RedisConfig config) {
+		super(id, config);
 	}
 
 	@Override
@@ -121,16 +121,7 @@ public class RedisSortedSetMultiMapState<K, V> extends AbstractRedisState<V> imp
 		@SuppressWarnings("rawtypes")
 		@Override
 		public State makeState(Map conf, IMetricsContext metrics, int partitionIndex, int numPartitions) {
-			State state;
-			String host = getHost(conf);
-			Integer port = getPort(conf);
-
-			if (host != null && port != null) {
-				state = new RedisSortedSetMultiMapState(this.id, host, port);
-			} else {
-				state = new RedisSortedSetMultiMapState(this.id);
-			}
-
+			State state = new RedisSortedSetMultiMapState(this.id, new RedisConfig(conf));
 			return state;
 		}
 	}

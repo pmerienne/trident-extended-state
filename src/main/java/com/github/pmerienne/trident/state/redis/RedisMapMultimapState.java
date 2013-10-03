@@ -25,18 +25,19 @@ import storm.trident.state.StateFactory;
 import backtype.storm.task.IMetricsContext;
 
 import com.github.pmerienne.trident.state.MapMultimapState;
-import com.github.pmerienne.trident.state.serializer.KryoValueSerializer;
 
 public class RedisMapMultimapState<K1, K2, V> extends AbstractRedisState<V> implements MapMultimapState<K1, K2, V> {
 
-	private Serializer<K2> keySerializer = new KryoValueSerializer<K2>();
+	private final Serializer<K2> keySerializer;
 
 	public RedisMapMultimapState(String id) {
 		super(id);
+		this.keySerializer = config.<K2> getSerializer();
 	}
 
-	public RedisMapMultimapState(String id, String host, int port) {
-		super(id, host, port);
+	public RedisMapMultimapState(String id, RedisConfig config) {
+		super(id, config);
+		this.keySerializer = config.<K2> getSerializer();
 	}
 
 	@Override
@@ -117,16 +118,7 @@ public class RedisMapMultimapState<K1, K2, V> extends AbstractRedisState<V> impl
 		@SuppressWarnings("rawtypes")
 		@Override
 		public State makeState(Map conf, IMetricsContext metrics, int partitionIndex, int numPartitions) {
-			State state;
-			String host = getHost(conf);
-			Integer port = getPort(conf);
-
-			if (host != null && port != null) {
-				state = new RedisMapMultimapState(this.id, host, port);
-			} else {
-				state = new RedisMapMultimapState(this.id);
-			}
-
+			State state = new RedisMapMultimapState(this.id, new RedisConfig(conf));
 			return state;
 		}
 	}

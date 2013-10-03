@@ -43,8 +43,8 @@ public class RedisSparseMatrixState<T> extends AbstractRedisState<T> implements 
 		super(id);
 	}
 
-	public RedisSparseMatrixState(String id, String host, int port) {
-		super(id, host, port);
+	public RedisSparseMatrixState(String id, RedisConfig config) {
+		super(id, config);
 	}
 
 	@Override
@@ -169,16 +169,7 @@ public class RedisSparseMatrixState<T> extends AbstractRedisState<T> implements 
 		@SuppressWarnings("rawtypes")
 		@Override
 		public State makeState(Map conf, IMetricsContext metrics, int partitionIndex, int numPartitions) {
-			State state;
-			String host = getHost(conf);
-			Integer port = getPort(conf);
-
-			if (host != null && port != null) {
-				state = new RedisSparseMatrixState(this.id, host, port);
-			} else {
-				state = new RedisSparseMatrixState(this.id);
-			}
-
+			State state = new RedisSparseMatrixState(this.id, new RedisConfig(conf));
 			return state;
 		}
 	}

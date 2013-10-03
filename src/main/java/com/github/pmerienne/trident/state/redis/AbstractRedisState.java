@@ -16,60 +16,48 @@
 package com.github.pmerienne.trident.state.redis;
 
 import java.util.List;
-import java.util.Map;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
-import redis.clients.jedis.Protocol;
 import storm.trident.state.Serializer;
 
 import com.github.pmerienne.trident.state.ExtendedState;
-import com.github.pmerienne.trident.state.serializer.KryoValueSerializer;
 
 public abstract class AbstractRedisState<T> implements ExtendedState<T> {
 
-	public final static String DEFAULT_HOST = "localhost";
-	public final static int DEFAULT_PORT = 6379;
+	protected final String id;
+	protected final RedisConfig config;
+	
+	protected final JedisPool pool;
 
-	public static final String REDIS_HOST_CONF = "redis.port";
-	public static final String REDIS_PORT_CONF = "redis.host";
+	protected final Serializer<T> serializer;
 
-	private final static String KEY_PREFIX = "state";
-	private final static String KEY_SEPARATOR = ":";
-
-	protected String id;
-	protected String host;
-	protected int port;
-	protected JedisPool pool;
-
-	protected Serializer<T> serializer = new KryoValueSerializer<T>();
-
-	public AbstractRedisState(String id, String host, int port) {
+	public AbstractRedisState(String id, RedisConfig config) {
 		this.id = id;
-		this.host = host;
-		this.port = port;
-		this.pool = new JedisPool(new JedisPoolConfig(), this.host, this.port, Protocol.DEFAULT_TIMEOUT, null, Protocol.DEFAULT_DATABASE);
+		this.config = config;
+		this.pool = new JedisPool(new JedisPoolConfig(), config.getHost(), config.getPort(), config.getTimeout(), null, config.getDatabase());
+		this.serializer = config.<T>getSerializer();
 	}
 
 	public AbstractRedisState(String id) {
-		this(id, DEFAULT_HOST, DEFAULT_PORT);
+		this(id, new RedisConfig());
 	}
 
 	protected String generateKey() {
-		StringBuilder sb = new StringBuilder(KEY_PREFIX).append(KEY_SEPARATOR).append(this.id);
+		StringBuilder sb = new StringBuilder(config.getKeyPrefix()).append(config.getKeySeparator()).append(this.id);
 		return sb.toString();
 	}
 
 	protected String generateKey(Object key) {
-		StringBuilder sb = new StringBuilder(KEY_PREFIX).append(KEY_SEPARATOR).append(this.id).append(KEY_SEPARATOR).append(key.toString());
+		StringBuilder sb = new StringBuilder(config.getKeyPrefix()).append(config.getKeySeparator()).append(this.id).append(config.getKeySeparator()).append(key.toString());
 		return sb.toString();
 	}
 
 	protected String generateKey(List<Object> keys) {
-		StringBuilder sb = new StringBuilder(KEY_PREFIX).append(KEY_SEPARATOR).append(this.id);
+		StringBuilder sb = new StringBuilder(config.getKeyPrefix()).append(config.getKeySeparator()).append(this.id);
 		for (Object key : keys) {
-			sb.append(KEY_SEPARATOR).append(key.toString());
+			sb.append(config.getKeySeparator()).append(key.toString());
 		}
 		return sb.toString();
 	}
@@ -81,18 +69,6 @@ public abstract class AbstractRedisState<T> implements ExtendedState<T> {
 		} finally {
 			this.pool.returnResource(jedis);
 		}
-	}
-
-	@SuppressWarnings("rawtypes")
-	protected static String getHost(Map conf) {
-		Object value = conf.get(REDIS_HOST_CONF);
-		return value == null || !(value instanceof String) ? null : (String) value;
-	}
-
-	@SuppressWarnings("rawtypes")
-	protected static Integer getPort(Map conf) {
-		Object value = conf.get(REDIS_PORT_CONF);
-		return value == null || !(value instanceof Integer) ? null : (Integer) value;
 	}
 	
 }

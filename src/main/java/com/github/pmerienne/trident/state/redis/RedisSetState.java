@@ -33,8 +33,8 @@ public class RedisSetState<T> extends AbstractRedisState<T> implements SetState<
 		super(id);
 	}
 
-	public RedisSetState(String id, String host, int port) {
-		super(id, host, port);
+	public RedisSetState(String id, RedisConfig config) {
+		super(id, config);
 	}
 
 	@Override
@@ -128,16 +128,7 @@ public class RedisSetState<T> extends AbstractRedisState<T> implements SetState<
 		@SuppressWarnings("rawtypes")
 		@Override
 		public State makeState(Map conf, IMetricsContext metrics, int partitionIndex, int numPartitions) {
-			State state;
-			String host = getHost(conf);
-			Integer port = getPort(conf);
-
-			if (host != null && port != null) {
-				state = new RedisSetState(this.id, host, port);
-			} else {
-				state = new RedisSetState(this.id);
-			}
-
+			State state = new RedisSetState(this.id, new RedisConfig(conf));
 			return state;
 		}
 	}
