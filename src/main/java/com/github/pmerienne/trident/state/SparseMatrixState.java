@@ -20,24 +20,93 @@ import java.util.Set;
 
 public interface SparseMatrixState<T> {
 
+	/**
+	 * Gets a specific value inside the matrix.
+	 * 
+	 * @param i
+	 *            row index
+	 * @param j
+	 *            column index
+	 * @return the specific value or <code>null</code> if no value was found
+	 */
 	T get(long i, long j);
 
+	/**
+	 * Sets a specific value inside the matrix.
+	 * 
+	 * @param i
+	 *            row index
+	 * @param j
+	 *            column index
+	 * @param value
+	 *            the new value
+	 */
 	void set(long i, long j, T value);
 
+	/**
+	 * Gets a specific column as a {@link SparseVector}.
+	 * 
+	 * @param i
+	 *            column index
+	 * @return the specific row
+	 */
 	SparseVector<T> getColumn(long i);
 
+	/**
+	 * Sets/Replaces a specific column.
+	 * 
+	 * @param i
+	 *            column index
+	 * @param column
+	 *            the new column
+	 */
 	void setColumn(long i, SparseVector<T> column);
 
+	/**
+	 * Gets a specific row as a {@link SparseVector}.
+	 * 
+	 * @param j
+	 *            row index
+	 * @return the specific row
+	 */
 	SparseVector<T> getRow(long j);
 
-	void setRow(long i, SparseVector<T> row);
+	/**
+	 * Sets/Replaces a specific row.
+	 * 
+	 * @param j
+	 *            row index
+	 * @param row
+	 *            the new row
+	 */
+	void setRow(long j, SparseVector<T> row);
 
 	public static interface SparseVector<T> extends Serializable {
 
+		/**
+		 * Gets a specific value
+		 * 
+		 * @param i
+		 *            value index
+		 * @return the value or <code>null</code> if no value was found
+		 */
 		T get(long i);
 
+		/**
+		 * Sets/Replace a specific value
+		 * 
+		 * @param i
+		 *            value index
+		 * @param value
+		 *            the new value
+		 */
 		void set(long i, T value);
 
+		/**
+		 * Returns a {@link Set} of the present indexes (ordered ASC)
+		 * 
+		 * @return
+		 */
 		Set<Long> indexes();
 
 	}
