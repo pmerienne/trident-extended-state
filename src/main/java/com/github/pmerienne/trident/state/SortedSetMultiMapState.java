@@ -17,6 +17,9 @@ package com.github.pmerienne.trident.state;
 
 import java.util.List;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+
 import storm.trident.state.State;
 
 /**
@@ -85,7 +88,6 @@ public interface SortedSetMultiMapState<K, V> extends ExtendedState<V> {
 	 */
 	double getScore(K key, V value);
 
-	@SuppressWarnings("rawtypes")
 	public static class ScoredValue<V> implements Comparable<ScoredValue<V>> {
 
 		private final double score;
@@ -112,39 +114,25 @@ public interface SortedSetMultiMapState<K, V> extends ExtendedState<V> {
 				if (this.score != o.score) {
 					return Double.compare(this.score, o.score);
 				} else {
-					return compare(o.getValue(), o.getValue());
+					return compare(this.getValue(), o.getValue());
 				}
 			}
 		}
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + ((value == null) ? 0 : value.hashCode());
-			return result;
+			return new HashCodeBuilder().append(value).toHashCode();
 		}
 
 		@Override
+		@SuppressWarnings("unchecked")
 		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			if (obj == null)
+			if (!(obj instanceof ScoredValue)) {
 				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			ScoredValue other = (ScoredValue) obj;
-			if (value == null) {
-				if (other.value != null)
-					return false;
-			} else if (!value.equals(other.value))
-				return false;
-			return true;
-		}
+			}
 
-		@Override
-		public String toString() {
-			return "ScoredValue [score=" + score + ", value=" + value + "]";
+			ScoredValue<V> other = (ScoredValue<V>) obj;
+			return new EqualsBuilder().append(this.value, other.value).isEquals();
 		}
 
 		@SuppressWarnings("unchecked")

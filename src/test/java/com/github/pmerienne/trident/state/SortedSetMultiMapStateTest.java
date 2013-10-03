@@ -15,9 +15,12 @@
  */
 package com.github.pmerienne.trident.state;
 
+import static java.util.Arrays.asList;
+import static org.fest.assertions.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.Test;
@@ -169,4 +172,25 @@ public abstract class SortedSetMultiMapStateTest {
 		assertTrue(actual.isEmpty());
 	}
 
+	@SuppressWarnings("unchecked")
+	@Test
+	public void should_sort_scored_value_by_score_asc() {
+		// Given
+		ScoredValue<String> lowValue = new ScoredValue<String>(0.0, "low");
+		ScoredValue<String> middle1Value = new ScoredValue<String>(0.5, "middle1");
+		ScoredValue<String> middle2Value = new ScoredValue<String>(0.5, "middle2");
+		ScoredValue<String> highValue = new ScoredValue<String>(1.0, "high");
+
+		List<ScoredValue<String>> scoredValues = asList(lowValue, middle1Value, middle2Value, highValue);
+		Collections.shuffle(scoredValues);
+
+		// When
+		Collections.sort(scoredValues);
+
+		// Then
+		assertThat(scoredValues.get(0)).isEqualTo(lowValue);
+		assertThat(scoredValues.get(1)).isEqualTo(middle1Value);
+		assertThat(scoredValues.get(2)).isEqualTo(middle2Value);
+		assertThat(scoredValues.get(3)).isEqualTo(highValue);
+	}
 }
