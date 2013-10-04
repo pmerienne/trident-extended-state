@@ -20,9 +20,9 @@ import java.util.Map;
 import java.util.UUID;
 
 import storm.trident.state.State;
-import storm.trident.state.StateFactory;
 import backtype.storm.task.IMetricsContext;
 
+import com.github.pmerienne.trident.state.ExtendedStateFactory;
 import com.github.pmerienne.trident.state.MapMultimapState;
 import com.github.pmerienne.trident.state.util.MapStateUtil;
 
@@ -53,14 +53,18 @@ public class MemoryMapMultimapState<K1, K2, V> extends TransactionalMemoryMapSta
 	}
 
 	@SuppressWarnings({ "rawtypes" })
-	public static class Factory implements StateFactory{
+	public static class Factory<K1, K2, V> implements ExtendedStateFactory<MemoryMapMultimapState<K1, K2, V>> {
 
-		private static final long serialVersionUID = -6865870100536320916L;
+		private static final long serialVersionUID = 1675795996734535938L;
 
 		private final String id;
 
 		public Factory() {
 			this.id = UUID.randomUUID().toString();
+		}
+
+		public Factory(String id) {
+			this.id = id;
 		}
 
 		@Override

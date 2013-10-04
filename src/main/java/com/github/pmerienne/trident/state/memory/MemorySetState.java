@@ -22,9 +22,9 @@ import java.util.Set;
 import java.util.UUID;
 
 import storm.trident.state.State;
-import storm.trident.state.StateFactory;
 import backtype.storm.task.IMetricsContext;
 
+import com.github.pmerienne.trident.state.ExtendedStateFactory;
 import com.github.pmerienne.trident.state.SetState;
 
 public class MemorySetState<T> extends TransactionalMemoryMapState<Set<T>> implements SetState<T> {
@@ -61,14 +61,18 @@ public class MemorySetState<T> extends TransactionalMemoryMapState<Set<T>> imple
 	}
 
 	@SuppressWarnings({ "rawtypes" })
-	public static class Factory implements StateFactory {
+	public static class Factory<T> implements ExtendedStateFactory<MemorySetState<T>> {
 
-		private static final long serialVersionUID = -6865870100536320916L;
+		private static final long serialVersionUID = 4769786989416998195L;
 
 		private final String _id;
 
 		public Factory() {
 			this._id = UUID.randomUUID().toString();
+		}
+
+		public Factory(String _id) {
+			this._id = _id;
 		}
 
 		@Override

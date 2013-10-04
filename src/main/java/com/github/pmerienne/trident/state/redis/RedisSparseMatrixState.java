@@ -20,15 +20,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import org.apache.commons.lang.StringUtils;
 
 import redis.clients.jedis.Jedis;
 import storm.trident.state.Serializer;
 import storm.trident.state.State;
-import storm.trident.state.StateFactory;
 import backtype.storm.task.IMetricsContext;
 
+import com.github.pmerienne.trident.state.ExtendedStateFactory;
 import com.github.pmerienne.trident.state.SparseMatrixState;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
@@ -156,11 +157,15 @@ public class RedisSparseMatrixState<T> extends AbstractRedisState<T> implements 
 	public void commit(Long txid) {
 	}
 
-	public static class Factory implements StateFactory {
+	public static class Factory<T> implements ExtendedStateFactory<RedisSparseMatrixState<T>> {
 
 		private static final long serialVersionUID = 4718043951532492603L;
 
-		private String id;
+		private final String id;
+
+		public Factory() {
+			this.id = UUID.randomUUID().toString();
+		}
 
 		public Factory(String id) {
 			this.id = id;

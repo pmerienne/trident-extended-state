@@ -21,9 +21,9 @@ import java.util.Set;
 import java.util.UUID;
 
 import storm.trident.state.State;
-import storm.trident.state.StateFactory;
 import backtype.storm.task.IMetricsContext;
 
+import com.github.pmerienne.trident.state.ExtendedStateFactory;
 import com.github.pmerienne.trident.state.SetMultiMapState;
 import com.github.pmerienne.trident.state.util.MapStateUtil;
 
@@ -41,7 +41,7 @@ public class MemorySetMultiMapState<K, V> extends TransactionalMemoryMapState<Se
 
 	@Override
 	public Set<V> get(K key) {
-		Set<V> value = 	MapStateUtil.getSingle(this, key);
+		Set<V> value = MapStateUtil.getSingle(this, key);
 		return value == null ? new HashSet<V>() : new HashSet<V>(value);
 	}
 
@@ -59,14 +59,18 @@ public class MemorySetMultiMapState<K, V> extends TransactionalMemoryMapState<Se
 	}
 
 	@SuppressWarnings({ "rawtypes" })
-	public static class Factory implements StateFactory {
+	public static class Factory<K, V> implements ExtendedStateFactory<MemorySetMultiMapState<K, V>> {
 
-		private static final long serialVersionUID = -6865870100536320916L;
+		private static final long serialVersionUID = 1375910273264827533L;
 
 		private final String id;
 
 		public Factory() {
 			this.id = UUID.randomUUID().toString();
+		}
+
+		public Factory(String id) {
+			this.id = id;
 		}
 
 		@Override

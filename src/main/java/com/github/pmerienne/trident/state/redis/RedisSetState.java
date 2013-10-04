@@ -19,12 +19,13 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import redis.clients.jedis.Jedis;
 import storm.trident.state.State;
-import storm.trident.state.StateFactory;
 import backtype.storm.task.IMetricsContext;
 
+import com.github.pmerienne.trident.state.ExtendedStateFactory;
 import com.github.pmerienne.trident.state.SetState;
 
 public class RedisSetState<T> extends AbstractRedisState<T> implements SetState<T> {
@@ -115,11 +116,15 @@ public class RedisSetState<T> extends AbstractRedisState<T> implements SetState<
 
 	}
 
-	public static class Factory implements StateFactory {
+	public static class Factory<T> implements ExtendedStateFactory<RedisSetState<T>> {
 
 		private static final long serialVersionUID = 4718043951532492603L;
 
-		private String id;
+		private final String id;
+
+		public Factory() {
+			this.id = UUID.randomUUID().toString();
+		}
 
 		public Factory(String id) {
 			this.id = id;

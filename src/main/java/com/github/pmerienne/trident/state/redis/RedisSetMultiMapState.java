@@ -18,12 +18,13 @@ package com.github.pmerienne.trident.state.redis;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import redis.clients.jedis.Jedis;
 import storm.trident.state.State;
-import storm.trident.state.StateFactory;
 import backtype.storm.task.IMetricsContext;
 
+import com.github.pmerienne.trident.state.ExtendedStateFactory;
 import com.github.pmerienne.trident.state.SetMultiMapState;
 
 public class RedisSetMultiMapState<K, V> extends AbstractRedisState<V> implements SetMultiMapState<K, V> {
@@ -95,11 +96,15 @@ public class RedisSetMultiMapState<K, V> extends AbstractRedisState<V> implement
 		return results;
 	}
 
-	public static class Factory implements StateFactory {
+	public static class Factory<K, V> implements ExtendedStateFactory<RedisSetMultiMapState<K, V>> {
 
 		private static final long serialVersionUID = 4718043951532492603L;
 
-		private String id;
+		private final String id;
+
+		public Factory() {
+			this.id = UUID.randomUUID().toString();
+		}
 
 		public Factory(String id) {
 			this.id = id;

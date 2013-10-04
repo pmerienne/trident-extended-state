@@ -23,9 +23,9 @@ import java.util.TreeSet;
 import java.util.UUID;
 
 import storm.trident.state.State;
-import storm.trident.state.StateFactory;
 import backtype.storm.task.IMetricsContext;
 
+import com.github.pmerienne.trident.state.ExtendedStateFactory;
 import com.github.pmerienne.trident.state.SortedSetMultiMapState;
 import com.github.pmerienne.trident.state.SortedSetMultiMapState.ScoredValue;
 import com.github.pmerienne.trident.state.util.MapStateUtil;
@@ -93,19 +93,23 @@ public class MemorySortedSetMultiMapState<K, T> extends TransactionalMemoryMapSt
 	}
 
 	@SuppressWarnings({ "rawtypes" })
-	public static class Factory implements StateFactory {
+	public static class Factory<K, T> implements ExtendedStateFactory<MemorySortedSetMultiMapState<K, T>> {
 
-		private static final long serialVersionUID = -6865870100536320916L;
+		private static final long serialVersionUID = 8867957095217639678L;
 
-		private final String _id;
+		private final String id;
 
 		public Factory() {
-			this._id = UUID.randomUUID().toString();
+			this.id = UUID.randomUUID().toString();
+		}
+
+		public Factory(String id) {
+			this.id = id;
 		}
 
 		@Override
 		public State makeState(Map conf, IMetricsContext metrics, int partitionIndex, int numPartitions) {
-			return new MemorySortedSetMultiMapState(this._id);
+			return new MemorySortedSetMultiMapState(this.id);
 		}
 	}
 
