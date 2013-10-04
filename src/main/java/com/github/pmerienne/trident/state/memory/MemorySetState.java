@@ -36,10 +36,7 @@ public class MemorySetState<T> extends TransactionalMemoryMapState<Set<T>> imple
 	@Override
 	public Set<T> get() {
 		Set<T> set = super.get();
-		if (set == null) {
-			set = new HashSet<T>();
-		}
-		return set;
+		return set == null ? new HashSet<T>() : new HashSet<T>(set);
 	}
 
 	@Override

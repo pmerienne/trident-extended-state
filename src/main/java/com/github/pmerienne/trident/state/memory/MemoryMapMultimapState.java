@@ -49,11 +49,11 @@ public class MemoryMapMultimapState<K1, K2, V> extends TransactionalMemoryMapSta
 	@Override
 	public Map<K2, V> getAll(K1 key) {
 		Map<K2, V> map = MapStateUtil.getSingle(this, key);
-		return map == null ? new HashMap<K2, V>() : map;
+		return map == null ? new HashMap<K2, V>() : new HashMap<K2, V>(map);
 	}
 
 	@SuppressWarnings({ "rawtypes" })
-	public static class Factory implements StateFactory {
+	public static class Factory implements StateFactory{
 
 		private static final long serialVersionUID = -6865870100536320916L;
 

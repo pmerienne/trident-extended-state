@@ -42,10 +42,7 @@ public class MemorySetMultiMapState<K, V> extends TransactionalMemoryMapState<Se
 	@Override
 	public Set<V> get(K key) {
 		Set<V> value = 	MapStateUtil.getSingle(this, key);
-		if(value == null) {
-			value = new HashSet<V>();
-		}
-		return value;
+		return value == null ? new HashSet<V>() : new HashSet<V>(value);
 	}
 
 	@Override

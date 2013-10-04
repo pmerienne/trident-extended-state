@@ -69,7 +69,7 @@ public class MemorySortedSetMultiMapState<K, T> extends TransactionalMemoryMapSt
 	@Override
 	public double getScore(K key, T value) {
 		TreeSet<ScoredValue<T>> set = this.get(key);
-		if (set == null) {
+		if (set == null || set.isEmpty()) {
 			return 0.0;
 		}
 
@@ -89,10 +89,7 @@ public class MemorySortedSetMultiMapState<K, T> extends TransactionalMemoryMapSt
 
 	protected TreeSet<ScoredValue<T>> get(K key) {
 		TreeSet<ScoredValue<T>> value = MapStateUtil.getSingle(this, key);
-		if (value == null) {
-			value = new TreeSet<ScoredValue<T>>();
-		}
-		return value;
+		return value == null ? new TreeSet<ScoredValue<T>>() : new TreeSet<ScoredValue<T>>(value);
 	}
 
 	@SuppressWarnings({ "rawtypes" })
