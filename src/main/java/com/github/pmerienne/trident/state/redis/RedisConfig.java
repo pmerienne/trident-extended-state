@@ -18,10 +18,12 @@ package com.github.pmerienne.trident.state.redis;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.github.pmerienne.trident.state.serializer.JsonValueSerializer;
+import org.apache.commons.lang.ObjectUtils;
 
 import redis.clients.jedis.Protocol;
 import storm.trident.state.Serializer;
+
+import com.github.pmerienne.trident.state.serializer.JsonValueSerializer;
 
 public class RedisConfig extends HashMap<String, String> {
 
@@ -46,12 +48,10 @@ public class RedisConfig extends HashMap<String, String> {
 	}
 
 	public RedisConfig(Map<?, ?> conf) {
-		super();
-
 		Object value;
 		for (Object key : conf.keySet()) {
 			value = conf.get(key);
-			put(key instanceof String ? (String) key : key.toString(), value instanceof String ? (String) value : value.toString());
+			put(key instanceof String ? (String) key : ObjectUtils.toString(key), value instanceof String ? (String) value : ObjectUtils.toString(value));
 		}
 	}
 
