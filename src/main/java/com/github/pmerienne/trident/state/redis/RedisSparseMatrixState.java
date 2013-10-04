@@ -96,21 +96,6 @@ public class RedisSparseMatrixState<T> extends AbstractRedisState<T> implements 
 	}
 
 	@Override
-	public void setColumn(long i, SparseVector<T> column) {
-		Jedis jedis = this.pool.getResource();
-		String columnKey = this.getColumnKey(i);
-
-		jedis.del(columnKey);
-
-		Map<String, String> values = new HashMap<String, String>();
-		for (long index : column.indexes()) {
-			values.put(Long.toString(index), new String(this.serializer.serialize(column.get(index))));
-		}
-
-		jedis.hmset(columnKey, values);
-	}
-
-	@Override
 	public SparseVector<T> getRow(long j) {
 		Jedis jedis = this.pool.getResource();
 
@@ -120,21 +105,6 @@ public class RedisSparseMatrixState<T> extends AbstractRedisState<T> implements 
 
 		SparseVector<T> row = new RedisSparseVector<T>(serializedResults, serializer);
 		return row;
-	}
-
-	@Override
-	public void setRow(long j, SparseVector<T> row) {
-		Jedis jedis = this.pool.getResource();
-		String rowKey = this.getRowKey(j);
-
-		jedis.del(rowKey);
-
-		Map<String, String> values = new HashMap<String, String>();
-		for (long index : row.indexes()) {
-			values.put(Long.toString(index), new String(this.serializer.serialize(row.get(index))));
-		}
-
-		jedis.hmset(rowKey, values);
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })

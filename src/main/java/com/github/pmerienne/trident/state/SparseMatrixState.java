@@ -18,7 +18,7 @@ package com.github.pmerienne.trident.state;
 import java.io.Serializable;
 import java.util.Set;
 
-public interface SparseMatrixState<T> {
+public interface SparseMatrixState<T> extends ExtendedState<T> {
 
 	/**
 	 * Gets a specific value inside the matrix.
@@ -53,16 +53,6 @@ public interface SparseMatrixState<T> {
 	SparseVector<T> getColumn(long i);
 
 	/**
-	 * Sets/Replaces a specific column.
-	 * 
-	 * @param i
-	 *            column index
-	 * @param column
-	 *            the new column
-	 */
-	void setColumn(long i, SparseVector<T> column);
-
-	/**
 	 * Gets a specific row as a {@link SparseVector}.
 	 * 
 	 * @param j
@@ -70,16 +60,6 @@ public interface SparseMatrixState<T> {
 	 * @return the specific row
 	 */
 	SparseVector<T> getRow(long j);
-
-	/**
-	 * Sets/Replaces a specific row.
-	 * 
-	 * @param j
-	 *            row index
-	 * @param row
-	 *            the new row
-	 */
-	void setRow(long j, SparseVector<T> row);
 
 	public static interface SparseVector<T> extends Serializable {
 

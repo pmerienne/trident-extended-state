@@ -17,9 +17,9 @@ package com.github.pmerienne.trident.state;
 
 import static org.fest.assertions.Assertions.assertThat;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.math.RandomUtils;
@@ -66,9 +66,12 @@ public abstract class SparseMatrixStateTest {
 		SparseVector<TestValue> actualColumn = this.state.getColumn(i);
 
 		// Then
-		assertThat(actualColumn.get(j1)).isEqualTo(expectedValue1);
-		assertThat(actualColumn.get(j2)).isEqualTo(expectedValue2);
-		assertThat(actualColumn.get(j3)).isEqualTo(expectedValue3);
+		SparseVector<TestValue> expectedColumn = new HashMapSparseVector<TestValue>();
+		expectedColumn.set(j1, expectedValue1);
+		expectedColumn.set(j2, expectedValue2);
+		expectedColumn.set(j3, expectedValue3);
+
+		assertThat(SparseVectorComparator.areEquals(actualColumn, expectedColumn)).isTrue();
 	}
 
 	@Test
@@ -90,50 +93,19 @@ public abstract class SparseMatrixStateTest {
 		SparseVector<TestValue> actualColumn = this.state.getRow(j);
 
 		// Then
-		assertThat(actualColumn.get(i1)).isEqualTo(expectedValue1);
-		assertThat(actualColumn.get(i2)).isEqualTo(expectedValue2);
-		assertThat(actualColumn.get(i3)).isEqualTo(expectedValue3);
-	}
-
-	@Test
-	public void should_set_column() {
-		// Given
-		long i = RandomUtils.nextInt();
 		SparseVector<TestValue> expectedColumn = new HashMapSparseVector<TestValue>();
-		expectedColumn.set(RandomUtils.nextInt(), TestValue.random());
-		expectedColumn.set(RandomUtils.nextInt(), TestValue.random());
-		expectedColumn.set(RandomUtils.nextInt(), TestValue.random());
+		expectedColumn.set(i1, expectedValue1);
+		expectedColumn.set(i2, expectedValue2);
+		expectedColumn.set(i3, expectedValue3);
 
-		// When
-		this.state.setColumn(i, expectedColumn);
-
-		// Then
-		SparseVector<TestValue> actualColumn = this.state.getColumn(i);
-		assertThat(new SparseVectorComparator<TestValue>().areEquals(actualColumn, expectedColumn)).isTrue();
-	}
-
-	@Test
-	public void should_set_row() {
-		// Given
-		long j = RandomUtils.nextInt();
-		SparseVector<TestValue> expectedRow = new HashMapSparseVector<TestValue>();
-		expectedRow.set(RandomUtils.nextInt(), TestValue.random());
-		expectedRow.set(RandomUtils.nextInt(), TestValue.random());
-		expectedRow.set(RandomUtils.nextInt(), TestValue.random());
-
-		// When
-		this.state.setRow(j, expectedRow);
-
-		// Then
-		SparseVector<TestValue> actualRow = this.state.getRow(j);
-		assertThat(new SparseVectorComparator<TestValue>().areEquals(actualRow, expectedRow)).isTrue();
+		assertThat(SparseVectorComparator.areEquals(actualColumn, expectedColumn)).isTrue();
 	}
 
 	public static class HashMapSparseVector<T> implements SparseVector<T> {
 
 		private static final long serialVersionUID = 1L;
 
-		private Map<Long, T> values = new HashMap<Long, T>();
+		private Map<Long, T> values = new TreeMap<Long, T>();
 
 		public T get(long i) {
 			return this.values.get(i);
@@ -153,9 +125,9 @@ public abstract class SparseMatrixStateTest {
 		}
 	}
 
-	private static class SparseVectorComparator<T> {
+	private static class SparseVectorComparator {
 
-		public boolean areEquals(SparseVector<T> v1, SparseVector<T> v2) {
+		public static <T> boolean areEquals(SparseVector<T> v1, SparseVector<T> v2) {
 
 			EqualsBuilder eq = new EqualsBuilder();
 			eq.append(v1.indexes(), v2.indexes());
