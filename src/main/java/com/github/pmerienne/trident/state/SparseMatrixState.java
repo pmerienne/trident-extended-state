@@ -89,5 +89,6 @@ public interface SparseMatrixState<T> extends ExtendedState<T> {
 		 */
 		Set<Long> indexes();
 
+		int size();
 	}
 }

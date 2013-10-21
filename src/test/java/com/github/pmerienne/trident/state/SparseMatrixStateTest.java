@@ -120,6 +120,11 @@ public abstract class SparseMatrixStateTest {
 		}
 
 		@Override
+		public int size() {
+			return this.values.size();
+		}
+
+		@Override
 		public String toString() {
 			return "SparseVector [values=" + values + "]";
 		}
