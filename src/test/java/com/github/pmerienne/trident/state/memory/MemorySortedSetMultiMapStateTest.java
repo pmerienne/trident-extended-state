@@ -30,6 +30,6 @@ public class MemorySortedSetMultiMapStateTest extends SortedSetMultiMapStateTest
 
 	@After
 	public void cleanup() {
-		TransactionalMemoryMapState.MemoryMapStateBacking.clearAll();
+		NonTransactionalMemoryMapState.MemoryMapStateBacking.clearAll();
 	}
 }

@@ -30,6 +30,6 @@ public class MemoryMapMultimapStateTest extends MapMultimapStateTest {
 
 	@After
 	public void cleanup() {
-		TransactionalMemoryMapState.MemoryMapStateBacking.clearAll();
+		NonTransactionalMemoryMapState.MemoryMapStateBacking.clearAll();
 	}
 }

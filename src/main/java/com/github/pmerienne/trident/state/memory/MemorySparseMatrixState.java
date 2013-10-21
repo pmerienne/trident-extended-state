@@ -28,7 +28,7 @@ import com.github.pmerienne.trident.state.ExtendedStateFactory;
 import com.github.pmerienne.trident.state.SparseMatrixState;
 import com.github.pmerienne.trident.state.util.MapStateUtil;
 
-public class MemorySparseMatrixState<T> extends TransactionalMemoryMapState<Map<Long, T>> implements SparseMatrixState<T> {
+public class MemorySparseMatrixState<T> extends NonTransactionalMemoryMapState<Map<Long, T>> implements SparseMatrixState<T> {
 
 	private final static String COLUMN_KEY = "column:";
 	private final static String ROW_KEY = "row:";

@@ -26,7 +26,7 @@ import com.github.pmerienne.trident.state.ExtendedStateFactory;
 import com.github.pmerienne.trident.state.MapMultimapState;
 import com.github.pmerienne.trident.state.util.MapStateUtil;
 
-public class MemoryMapMultimapState<K1, K2, V> extends TransactionalMemoryMapState<Map<K2, V>> implements MapMultimapState<K1, K2, V> {
+public class MemoryMapMultimapState<K1, K2, V> extends NonTransactionalMemoryMapState<Map<K2, V>> implements MapMultimapState<K1, K2, V> {
 
 	public MemoryMapMultimapState(String id) {
 		super(id);

@@ -30,21 +30,21 @@ import storm.trident.state.TransactionalValue;
 import storm.trident.state.ValueUpdater;
 import storm.trident.state.map.IBackingMap;
 import storm.trident.state.map.MapState;
+import storm.trident.state.map.NonTransactionalMap;
 import storm.trident.state.map.SnapshottableMap;
-import storm.trident.state.map.TransactionalMap;
 import storm.trident.state.snapshot.Snapshottable;
 import backtype.storm.task.IMetricsContext;
 import backtype.storm.tuple.Values;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public class TransactionalMemoryMapState<T> implements Snapshottable<T>, ITupleCollection, MapState<T> {
+public class NonTransactionalMemoryMapState<T> implements Snapshottable<T>, ITupleCollection, MapState<T> {
 
-	MemoryMapStateBacking<TransactionalValue> _backing;
+	MemoryMapStateBacking<T> _backing;
 	SnapshottableMap<T> _delegate;
 
-	public TransactionalMemoryMapState(String id) {
+	public NonTransactionalMemoryMapState(String id) {
 		_backing = new MemoryMapStateBacking(id);
-		_delegate = new SnapshottableMap(TransactionalMap.build(_backing), new Values("$MEMORY-MAP-STATE-GLOBAL$"));
+		_delegate = new SnapshottableMap(NonTransactionalMap.build(_backing), new Values("$MEMORY-MAP-STATE-GLOBAL$"));
 	}
 
 	public T update(ValueUpdater updater) {
@@ -94,7 +94,7 @@ public class TransactionalMemoryMapState<T> implements Snapshottable<T>, ITupleC
 
 		@Override
 		public State makeState(Map conf, IMetricsContext metrics, int partitionIndex, int numPartitions) {
-			return new TransactionalMemoryMapState(_id);
+			return new NonTransactionalMemoryMapState(_id);
 		}
 	}
 
