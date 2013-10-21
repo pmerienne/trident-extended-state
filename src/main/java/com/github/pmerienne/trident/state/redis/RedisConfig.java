@@ -37,12 +37,14 @@ public class RedisConfig extends HashMap<String, String> {
 	public static final String TIMEOUT = "redis.timeout";
 	public static final String DATABASE = "redis.database";
 	public static final String SERIALIZER = "redis.serializer";
+	public static final String MAX_ACTIVE_CONNECTION = "redis.max.active.connection";
 
 	public final static String DEFAULT_HOST = "localhost";
 	public final static String DEFAULT_PASSWORD = null;
 	public final static String DEFAULT_KEY_PREFIX = "state";
 	public final static String DEFAULT_KEY_SEPARATOR = ":";
 	public final static String DEFAULT_SERIALIZER = JsonValueSerializer.class.getName();
+	private final static int DEFAULT_MAX_ACTIVE_CONNECTION = 100;
 
 	public RedisConfig() {
 	}
@@ -109,6 +111,14 @@ public class RedisConfig extends HashMap<String, String> {
 
 	public void setDatabase(Integer database) {
 		put(DATABASE, Integer.toString(database));
+	}
+
+	public Integer getMaxActiveConnection() {
+		return getInteger(MAX_ACTIVE_CONNECTION, DEFAULT_MAX_ACTIVE_CONNECTION);
+	}
+
+	public void setMaxActiveConnection(Integer maxActiveConnection) {
+		put(MAX_ACTIVE_CONNECTION, Integer.toString(maxActiveConnection));
 	}
 
 	@SuppressWarnings("unchecked")

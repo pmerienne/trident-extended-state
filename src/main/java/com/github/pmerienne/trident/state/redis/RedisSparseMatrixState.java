@@ -37,29 +37,52 @@ import com.google.common.collect.Sets;
 
 public class RedisSparseMatrixState<T> extends AbstractRedisState<T> implements SparseMatrixState<T> {
 
-	private final static String COLUMN_KEY = "column";
-	private final static String ROW_KEY = "row";
+	private final static String DEFAULT_COLUMN_KEY = "column";
+	private final static String DEFAULT_ROW_KEY = "row";
+
+	private final String columnKey;
+	private final String rowKey;
 
 	public RedisSparseMatrixState(String id) {
 		super(id);
+		this.columnKey = DEFAULT_COLUMN_KEY;
+		this.rowKey = DEFAULT_ROW_KEY;
+	}
+
+	public RedisSparseMatrixState(String id, String columnKey, String rowKey) {
+		super(id);
+		this.columnKey = columnKey;
+		this.rowKey = rowKey;
 	}
 
 	public RedisSparseMatrixState(String id, RedisConfig config) {
 		super(id, config);
+		this.columnKey = DEFAULT_COLUMN_KEY;
+		this.rowKey = DEFAULT_ROW_KEY;
+	}
+
+	public RedisSparseMatrixState(String id, RedisConfig config, String columnKey, String rowKey) {
+		super(id, config);
+		this.columnKey = columnKey;
+		this.rowKey = rowKey;
 	}
 
 	@Override
 	public T get(long i, long j) {
 		Jedis jedis = this.pool.getResource();
-		String rowKey = this.getRowKey(j);
-		String serializedValue = jedis.hget(rowKey, Long.toString(i));
+		try {
+			String rowKey = this.getRowKey(j);
+			String serializedValue = jedis.hget(rowKey, Long.toString(i));
 
-		if (StringUtils.isBlank(serializedValue)) {
-			return null;
+			if (StringUtils.isBlank(serializedValue)) {
+				return null;
+			}
+
+			T value = this.serializer.deserialize(serializedValue.getBytes());
+			return value;
+		} finally {
+			this.pool.returnResource(jedis);
 		}
-
-		T value = this.serializer.deserialize(serializedValue.getBytes());
-		return value;
 	}
 
 	@Override
@@ -73,49 +96,59 @@ public class RedisSparseMatrixState<T> extends AbstractRedisState<T> implements 
 
 	protected void set(String key, long index, T value) {
 		Jedis jedis = this.pool.getResource();
-		String field = Long.toString(index);
+		try {
+			String field = Long.toString(index);
 
-		if (value != null) {
-			byte[] serializedValue = this.serializer.serialize(value);
-			jedis.hset(key, field, new String(serializedValue));
-		} else {
-			jedis.hdel(key, field);
+			if (value != null) {
+				byte[] serializedValue = this.serializer.serialize(value);
+				jedis.hset(key, field, new String(serializedValue));
+			} else {
+				jedis.hdel(key, field);
+			}
+
+		} finally {
+			this.pool.returnResource(jedis);
 		}
 	}
 
 	@Override
 	public SparseVector<T> getColumn(long i) {
 		Jedis jedis = this.pool.getResource();
+		try {
 
-		String columnKey = this.getColumnKey(i);
+			String columnKey = this.getColumnKey(i);
+			Map<String, String> serializedResults = jedis.hgetAll(columnKey);
 
-		Map<String, String> serializedResults = jedis.hgetAll(columnKey);
-
-		SparseVector<T> column = new RedisSparseVector<T>(serializedResults, serializer);
-		return column;
+			SparseVector<T> column = new RedisSparseVector<T>(serializedResults, serializer);
+			return column;
+		} finally {
+			this.pool.returnResource(jedis);
+		}
 	}
 
 	@Override
 	public SparseVector<T> getRow(long j) {
 		Jedis jedis = this.pool.getResource();
+		try {
+			String rowKey = this.getRowKey(j);
+			Map<String, String> serializedResults = jedis.hgetAll(rowKey);
 
-		String rowKey = this.getRowKey(j);
-
-		Map<String, String> serializedResults = jedis.hgetAll(rowKey);
-
-		SparseVector<T> row = new RedisSparseVector<T>(serializedResults, serializer);
-		return row;
+			SparseVector<T> row = new RedisSparseVector<T>(serializedResults, serializer);
+			return row;
+		} finally {
+			this.pool.returnResource(jedis);
+		}
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	protected String getColumnKey(long i) {
-		List keys = Arrays.asList(COLUMN_KEY, Long.toString(i));
+		List keys = Arrays.asList(columnKey, Long.toString(i));
 		return this.generateKey(keys);
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	protected String getRowKey(long j) {
-		List keys = Arrays.asList(ROW_KEY, Long.toString(j));
+		List keys = Arrays.asList(rowKey, Long.toString(j));
 		return this.generateKey(keys);
 	}
 
@@ -195,6 +228,11 @@ public class RedisSparseMatrixState<T> extends AbstractRedisState<T> implements 
 				}
 
 			}));
+		}
+
+		@Override
+		public int size() {
+			return this.values.size();
 		}
 	}
 

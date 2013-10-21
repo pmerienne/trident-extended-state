@@ -28,7 +28,7 @@ public abstract class AbstractRedisState<T> implements ExtendedState<T> {
 
 	protected final String id;
 	protected final RedisConfig config;
-	
+
 	protected final JedisPool pool;
 
 	protected final Serializer<T> serializer;
@@ -36,8 +36,11 @@ public abstract class AbstractRedisState<T> implements ExtendedState<T> {
 	public AbstractRedisState(String id, RedisConfig config) {
 		this.id = id;
 		this.config = config;
-		this.pool = new JedisPool(new JedisPoolConfig(), config.getHost(), config.getPort(), config.getTimeout(), null, config.getDatabase());
-		this.serializer = config.<T>getSerializer();
+		this.serializer = config.<T> getSerializer();
+
+		JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
+		jedisPoolConfig.setMaxActive(config.getMaxActiveConnection());
+		this.pool = new JedisPool(jedisPoolConfig, config.getHost(), config.getPort(), config.getTimeout(), null, config.getDatabase());
 	}
 
 	public AbstractRedisState(String id) {
@@ -70,5 +73,5 @@ public abstract class AbstractRedisState<T> implements ExtendedState<T> {
 			this.pool.returnResource(jedis);
 		}
 	}
-	
+
 }
