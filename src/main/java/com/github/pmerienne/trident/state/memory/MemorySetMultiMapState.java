@@ -46,16 +46,14 @@ public class MemorySetMultiMapState<K, V> extends NonTransactionalMemoryMapState
 	}
 
 	@Override
-	public boolean put(K key, V value) {
+	public void put(K key, V value) {
 		Set<V> set = this.get(key);
 		if (set == null) {
 			set = new HashSet<V>();
 		}
 
-		boolean result = set.add(value);
+		set.add(value);
 		MapStateUtil.putSingle(this, key, set);
-
-		return result;
 	}
 
 	@SuppressWarnings({ "rawtypes" })

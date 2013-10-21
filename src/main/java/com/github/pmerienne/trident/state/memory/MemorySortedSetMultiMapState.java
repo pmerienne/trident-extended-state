@@ -43,13 +43,11 @@ public class MemorySortedSetMultiMapState<K, T> extends NonTransactionalMemoryMa
 	}
 
 	@Override
-	public boolean put(K key, ScoredValue<T> scoredValue) {
+	public void put(K key, ScoredValue<T> scoredValue) {
 		TreeSet<ScoredValue<T>> set = this.get(key);
 
-		boolean result = set.add(scoredValue);
+		set.add(scoredValue);
 		MapStateUtil.putSingle(this, key, set);
-
-		return result;
 	}
 
 	@Override

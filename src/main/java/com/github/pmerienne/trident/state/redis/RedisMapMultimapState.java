@@ -50,18 +50,15 @@ public class RedisMapMultimapState<K1, K2, V> extends AbstractRedisState<V> impl
 	}
 
 	@Override
-	public boolean put(K1 key, K2 subkey, V value) {
+	public void put(K1 key, K2 subkey, V value) {
 		Jedis jedis = this.pool.getResource();
-		long result;
 		try {
 			byte[] rawKey = this.generateKey(key);
 			byte[] rawSubKey = this.keySerializer.serialize(subkey);
-			result = jedis.hset(rawKey, rawSubKey, this.serializer.serialize(value));
+			jedis.hset(rawKey, rawSubKey, this.serializer.serialize(value));
 		} finally {
 			this.pool.returnResource(jedis);
 		}
-
-		return result >= 1;
 	}
 
 	@Override

@@ -60,17 +60,14 @@ public class RedisSetMultiMapState<K, V> extends AbstractRedisState<V> implement
 	}
 
 	@Override
-	public boolean put(K key, V value) {
+	public void put(K key, V value) {
 		Jedis jedis = this.pool.getResource();
-		long result;
 		try {
 			byte[] rawKey = this.generateKey(key);
-			result = jedis.sadd(rawKey, this.serializer.serialize(value));
+			jedis.sadd(rawKey, this.serializer.serialize(value));
 		} finally {
 			this.pool.returnResource(jedis);
 		}
-
-		return result == 1;
 
 	}
 

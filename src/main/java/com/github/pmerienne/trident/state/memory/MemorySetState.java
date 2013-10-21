@@ -40,19 +40,17 @@ public class MemorySetState<T> extends NonTransactionalMemoryMapState<Set<T>> im
 	}
 
 	@Override
-	public boolean add(T e) {
+	public void add(T e) {
 		Set<T> set = this.get();
-		boolean result = set.add(e);
+		set.add(e);
 		this.set(set);
-		return result;
 	}
 
 	@Override
-	public boolean addAll(Collection<? extends T> c) {
+	public void addAll(Collection<? extends T> c) {
 		Set<T> set = this.get();
-		boolean result = set.addAll(c);
+		set.addAll(c);
 		this.set(set);
-		return result;
 	}
 
 	@Override

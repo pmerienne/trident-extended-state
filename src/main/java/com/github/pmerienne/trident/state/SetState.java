@@ -35,10 +35,8 @@ public interface SetState<E> extends ExtendedState<E> {
 	 * 
 	 * @param e
 	 *            element to be added to this set
-	 * @return <code>true</code> if this set did not already contain the
-	 *         specified element
 	 */
-	boolean add(E e);
+	void add(E e);
 
 	/**
 	 * Adds all of the elements in the specified collection to this set if
@@ -46,9 +44,8 @@ public interface SetState<E> extends ExtendedState<E> {
 	 * 
 	 * @param c
 	 *            collection containing elements to be added to this set
-	 * @return <code>true</code> if this set changed as a result of the call
 	 */
-	boolean addAll(Collection<? extends E> c);
+	void addAll(Collection<? extends E> c);
 
 	/**
 	 * @return the whole {@link Set} contained in this {@link State}

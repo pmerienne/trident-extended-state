@@ -39,9 +39,8 @@ public interface MapMultimapState<K1, K2, V> extends ExtendedState<V> {
 	 * @param key
 	 * @param subkey
 	 * @param value
-	 * @return
 	 */
-	boolean put(K1 key, K2 subkey, V value);
+	void put(K1 key, K2 subkey, V value);
 
 	/**
 	 * Get the value stored at key, subkey.

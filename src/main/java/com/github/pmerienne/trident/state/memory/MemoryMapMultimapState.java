@@ -33,11 +33,10 @@ public class MemoryMapMultimapState<K1, K2, V> extends NonTransactionalMemoryMap
 	}
 
 	@Override
-	public boolean put(K1 key, K2 subkey, V value) {
+	public void put(K1 key, K2 subkey, V value) {
 		Map<K2, V> all = this.getAll(key);
-		V previous = all.put(subkey, value);
+		all.put(subkey, value);
 		MapStateUtil.putSingle(this, key, all);
-		return previous == null;
 	}
 
 	@Override

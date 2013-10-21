@@ -62,18 +62,14 @@ public class RedisSortedSetMultiMapState<K, V> extends AbstractRedisState<V> imp
 	}
 
 	@Override
-	public boolean put(K key, ScoredValue<V> value) {
+	public void put(K key, ScoredValue<V> value) {
 		Jedis jedis = this.pool.getResource();
-		long result;
 		try {
 			byte[] rawKey = this.generateKey(key);
-			result = jedis.zadd(rawKey, value.getScore(), this.serializer.serialize(value.getValue()));
+			jedis.zadd(rawKey, value.getScore(), this.serializer.serialize(value.getValue()));
 		} finally {
 			this.pool.returnResource(jedis);
 		}
-
-		return result >= 1;
-
 	}
 
 	@Override

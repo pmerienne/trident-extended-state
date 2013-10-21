@@ -49,9 +49,8 @@ public interface SetMultiMapState<K, V> extends ExtendedState<V> {
 	 *            key to store
 	 * @param value
 	 *            value to store
-	 * @return <code>true</code> if this changed the state
 	 */
-	boolean put(K key, V value);
+	void put(K key, V value);
 
 	/**
 	 * Returns a {@link Set} view of all values associated with a key. If

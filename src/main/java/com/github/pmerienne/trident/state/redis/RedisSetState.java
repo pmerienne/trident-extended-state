@@ -47,23 +47,19 @@ public class RedisSetState<T> extends AbstractRedisState<T> implements SetState<
 	}
 
 	@Override
-	public boolean add(T e) {
+	public void add(T e) {
 		Jedis jedis = this.pool.getResource();
-		long result;
 		try {
 			byte[] key = this.generateKey();
-			result = jedis.sadd(key, this.serializer.serialize(e));
+			jedis.sadd(key, this.serializer.serialize(e));
 		} finally {
 			this.pool.returnResource(jedis);
 		}
-
-		return result >= 1;
 	}
 
 	@Override
-	public boolean addAll(Collection<? extends T> c) {
+	public void addAll(Collection<? extends T> c) {
 		Jedis jedis = this.pool.getResource();
-		long result;
 
 		byte[] key = this.generateKey();
 		byte[][] members = new byte[c.size()][];
@@ -74,12 +70,11 @@ public class RedisSetState<T> extends AbstractRedisState<T> implements SetState<
 		}
 
 		try {
-			result = jedis.sadd(key, members);
+			jedis.sadd(key, members);
 		} finally {
 			this.pool.returnResource(jedis);
 		}
 
-		return result >= 1;
 	}
 
 	@Override

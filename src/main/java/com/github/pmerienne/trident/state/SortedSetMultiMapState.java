@@ -59,9 +59,8 @@ public interface SortedSetMultiMapState<K, V> extends ExtendedState<V> {
 	 *            key to store
 	 * @param value
 	 *            scored value to store
-	 * @return <code>true</code> if this set changed as a result of the call
 	 */
-	boolean put(K key, ScoredValue<V> value);
+	void put(K key, ScoredValue<V> value);
 
 	/**
 	 * Returns the specified range of elements in the sorted set stored at key.
