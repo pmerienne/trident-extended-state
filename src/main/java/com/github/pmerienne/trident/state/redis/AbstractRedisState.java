@@ -47,22 +47,22 @@ public abstract class AbstractRedisState<T> implements ExtendedState<T> {
 		this(id, new RedisConfig());
 	}
 
-	protected String generateKey() {
+	protected byte[] generateKey() {
 		StringBuilder sb = new StringBuilder(config.getKeyPrefix()).append(config.getKeySeparator()).append(this.id);
-		return sb.toString();
+		return sb.toString().getBytes();
 	}
 
-	protected String generateKey(Object key) {
+	protected byte[] generateKey(Object key) {
 		StringBuilder sb = new StringBuilder(config.getKeyPrefix()).append(config.getKeySeparator()).append(this.id).append(config.getKeySeparator()).append(key.toString());
-		return sb.toString();
+		return sb.toString().getBytes();
 	}
 
-	protected String generateKey(List<Object> keys) {
+	protected byte[] generateKey(List<Object> keys) {
 		StringBuilder sb = new StringBuilder(config.getKeyPrefix()).append(config.getKeySeparator()).append(this.id);
 		for (Object key : keys) {
 			sb.append(config.getKeySeparator()).append(key.toString());
 		}
-		return sb.toString();
+		return sb.toString().getBytes();
 	}
 
 	public void flushAll() {

@@ -22,8 +22,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import org.apache.commons.lang.StringUtils;
-
 import redis.clients.jedis.Jedis;
 import storm.trident.state.Serializer;
 import storm.trident.state.State;
@@ -71,14 +69,14 @@ public class RedisSparseMatrixState<T> extends AbstractRedisState<T> implements 
 	public T get(long i, long j) {
 		Jedis jedis = this.pool.getResource();
 		try {
-			String rowKey = this.getRowKey(j);
-			String serializedValue = jedis.hget(rowKey, Long.toString(i));
+			byte[] rowKey = this.getRowKey(j);
+			byte[] serializedValue = jedis.hget(rowKey, Long.toString(i).getBytes());
 
-			if (StringUtils.isBlank(serializedValue)) {
+			if (serializedValue == null) {
 				return null;
 			}
 
-			T value = this.serializer.deserialize(serializedValue.getBytes());
+			T value = this.serializer.deserialize(serializedValue);
 			return value;
 		} finally {
 			this.pool.returnResource(jedis);
@@ -87,21 +85,21 @@ public class RedisSparseMatrixState<T> extends AbstractRedisState<T> implements 
 
 	@Override
 	public void set(long i, long j, T value) {
-		String columnKey = this.getColumnKey(i);
-		String rowKey = this.getRowKey(j);
+		byte[] columnKey = this.getColumnKey(i);
+		byte[] rowKey = this.getRowKey(j);
 
 		this.set(rowKey, i, value);
 		this.set(columnKey, j, value);
 	}
 
-	protected void set(String key, long index, T value) {
+	protected void set(byte[] key, long index, T value) {
 		Jedis jedis = this.pool.getResource();
 		try {
-			String field = Long.toString(index);
+			byte[] field = Long.toString(index).getBytes();
 
 			if (value != null) {
 				byte[] serializedValue = this.serializer.serialize(value);
-				jedis.hset(key, field, new String(serializedValue));
+				jedis.hset(key, field, serializedValue);
 			} else {
 				jedis.hdel(key, field);
 			}
@@ -116,8 +114,8 @@ public class RedisSparseMatrixState<T> extends AbstractRedisState<T> implements 
 		Jedis jedis = this.pool.getResource();
 		try {
 
-			String columnKey = this.getColumnKey(i);
-			Map<String, String> serializedResults = jedis.hgetAll(columnKey);
+			byte[] columnKey = this.getColumnKey(i);
+			Map<byte[], byte[]> serializedResults = jedis.hgetAll(columnKey);
 
 			SparseVector<T> column = new RedisSparseVector<T>(serializedResults, serializer);
 			return column;
@@ -130,8 +128,8 @@ public class RedisSparseMatrixState<T> extends AbstractRedisState<T> implements 
 	public SparseVector<T> getRow(long j) {
 		Jedis jedis = this.pool.getResource();
 		try {
-			String rowKey = this.getRowKey(j);
-			Map<String, String> serializedResults = jedis.hgetAll(rowKey);
+			byte[] rowKey = this.getRowKey(j);
+			Map<byte[], byte[]> serializedResults = jedis.hgetAll(rowKey);
 
 			SparseVector<T> row = new RedisSparseVector<T>(serializedResults, serializer);
 			return row;
@@ -141,13 +139,13 @@ public class RedisSparseMatrixState<T> extends AbstractRedisState<T> implements 
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	protected String getColumnKey(long i) {
+	protected byte[] getColumnKey(long i) {
 		List keys = Arrays.asList(columnKey, Long.toString(i));
 		return this.generateKey(keys);
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	protected String getRowKey(long j) {
+	protected byte[] getRowKey(long j) {
 		List keys = Arrays.asList(rowKey, Long.toString(j));
 		return this.generateKey(keys);
 	}
@@ -186,33 +184,33 @@ public class RedisSparseMatrixState<T> extends AbstractRedisState<T> implements 
 
 		private static final long serialVersionUID = 3559058694806143009L;
 
-		private Map<String, String> values = new HashMap<String, String>();
+		private Map<byte[], byte[]> values = new HashMap<byte[], byte[]>();
 		protected Serializer<T> serializer;
 
 		public RedisSparseVector() {
 		}
 
-		public RedisSparseVector(Map<String, String> values, Serializer<T> serializer) {
+		public RedisSparseVector(Map<byte[], byte[]> values, Serializer<T> serializer) {
 			this.values = values;
 			this.serializer = serializer;
 		}
 
 		@Override
 		public T get(long i) {
-			String serializedValue = this.values.get(Long.toString(i));
-			if (StringUtils.isBlank(serializedValue)) {
+			byte[] serializedValue = this.values.get(Long.toString(i).getBytes());
+			if (serializedValue == null) {
 				return null;
 			} else {
-				return this.serializer.deserialize(serializedValue.getBytes());
+				return this.serializer.deserialize(serializedValue);
 			}
 		}
 
 		@Override
 		public void set(long i, T value) {
-			String key = Long.toString(i);
+			byte[] key = Long.toString(i).getBytes();
 
 			if (value != null) {
-				String serializedValue = new String(this.serializer.serialize(value));
+				byte[] serializedValue = this.serializer.serialize(value);
 				this.values.put(key, serializedValue);
 			} else {
 				this.values.remove(key);
@@ -221,10 +219,10 @@ public class RedisSparseMatrixState<T> extends AbstractRedisState<T> implements 
 
 		@Override
 		public Set<Long> indexes() {
-			return Sets.newTreeSet(Iterables.transform(this.values.keySet(), new Function<String, Long>() {
+			return Sets.newTreeSet(Iterables.transform(this.values.keySet(), new Function<byte[], Long>() {
 				@Override
-				public Long apply(String string) {
-					return Long.parseLong(string);
+				public Long apply(byte[] bytes) {
+					return Long.parseLong(new String(bytes));
 				}
 
 			}));

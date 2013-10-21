@@ -54,9 +54,9 @@ public class RedisMapMultimapState<K1, K2, V> extends AbstractRedisState<V> impl
 		Jedis jedis = this.pool.getResource();
 		long result;
 		try {
-			String stringKey = this.generateKey(key);
-			String stringSubKey = new String(this.keySerializer.serialize(subkey));
-			result = jedis.hset(stringKey, stringSubKey, new String(this.serializer.serialize(value)));
+			byte[] rawKey = this.generateKey(key);
+			byte[] rawSubKey = this.keySerializer.serialize(subkey);
+			result = jedis.hset(rawKey, rawSubKey, this.serializer.serialize(value));
 		} finally {
 			this.pool.returnResource(jedis);
 		}
@@ -69,11 +69,11 @@ public class RedisMapMultimapState<K1, K2, V> extends AbstractRedisState<V> impl
 		Jedis jedis = this.pool.getResource();
 		V result = null;
 		try {
-			String stringKey = this.generateKey(key);
-			String stringSubKey = new String(this.keySerializer.serialize(subkey));
-			String resultAsString = jedis.hget(stringKey, stringSubKey);
-			if (resultAsString != null && !resultAsString.isEmpty()) {
-				result = this.serializer.deserialize(resultAsString.getBytes());
+			byte[] rawKey = this.generateKey(key);
+			byte[] rawSubKey = this.keySerializer.serialize(subkey);
+			byte[] resultAsString = jedis.hget(rawKey, rawSubKey);
+			if (resultAsString != null) {
+				result = this.serializer.deserialize(resultAsString);
 			}
 		} finally {
 			this.pool.returnResource(jedis);
@@ -88,14 +88,14 @@ public class RedisMapMultimapState<K1, K2, V> extends AbstractRedisState<V> impl
 
 		Jedis jedis = this.pool.getResource();
 		try {
-			String stringKey = this.generateKey(key);
-			Map<String, String> resultsAsString = jedis.hgetAll(stringKey);
+			byte[] rawKey = this.generateKey(key);
+			Map<byte[], byte[]> rawResults = jedis.hgetAll(rawKey);
 
 			K2 subkey;
 			V value;
-			for (String stringSubkey : resultsAsString.keySet()) {
-				subkey = this.keySerializer.deserialize(stringSubkey.getBytes());
-				value = this.serializer.deserialize(resultsAsString.get(stringSubkey).getBytes());
+			for (byte[] subKey : rawResults.keySet()) {
+				subkey = this.keySerializer.deserialize(subKey);
+				value = this.serializer.deserialize(rawResults.get(subKey));
 				results.put(subkey, value);
 			}
 
@@ -115,7 +115,7 @@ public class RedisMapMultimapState<K1, K2, V> extends AbstractRedisState<V> impl
 		public Factory() {
 			this.id = UUID.randomUUID().toString();
 		}
-		
+
 		public Factory(String id) {
 			this.id = id;
 		}

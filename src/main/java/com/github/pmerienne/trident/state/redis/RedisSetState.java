@@ -51,8 +51,8 @@ public class RedisSetState<T> extends AbstractRedisState<T> implements SetState<
 		Jedis jedis = this.pool.getResource();
 		long result;
 		try {
-			String key = this.generateKey();
-			result = jedis.sadd(key, new String(this.serializer.serialize(e)));
+			byte[] key = this.generateKey();
+			result = jedis.sadd(key, this.serializer.serialize(e));
 		} finally {
 			this.pool.returnResource(jedis);
 		}
@@ -65,11 +65,11 @@ public class RedisSetState<T> extends AbstractRedisState<T> implements SetState<
 		Jedis jedis = this.pool.getResource();
 		long result;
 
-		String key = this.generateKey();
-		String[] members = new String[c.size()];
+		byte[] key = this.generateKey();
+		byte[][] members = new byte[c.size()][];
 		int i = 0;
 		for (T element : c) {
-			members[i] = new String(this.serializer.serialize(element));
+			members[i] = this.serializer.serialize(element);
 			i++;
 		}
 
@@ -88,13 +88,13 @@ public class RedisSetState<T> extends AbstractRedisState<T> implements SetState<
 
 		Jedis jedis = this.pool.getResource();
 		try {
-			String key = this.generateKey();
-			Set<String> resultsAsString = jedis.smembers(key);
-			for (String result : resultsAsString) {
-				if (result == null || result.isEmpty()) {
+			byte[] key = this.generateKey();
+			Set<byte[]> rawResults = jedis.smembers(key);
+			for (byte[] result : rawResults) {
+				if (result == null) {
 					results.add(null);
 				} else {
-					results.add(this.serializer.deserialize(result.getBytes()));
+					results.add(this.serializer.deserialize(result));
 				}
 			}
 		} finally {
@@ -108,7 +108,7 @@ public class RedisSetState<T> extends AbstractRedisState<T> implements SetState<
 	public void clear() {
 		Jedis jedis = this.pool.getResource();
 		try {
-			String key = this.generateKey();
+			byte[] key = this.generateKey();
 			jedis.del(key);
 		} finally {
 			this.pool.returnResource(jedis);

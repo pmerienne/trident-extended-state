@@ -50,8 +50,8 @@ public class RedisSetMultiMapState<K, V> extends AbstractRedisState<V> implement
 		Jedis jedis = this.pool.getResource();
 		long result;
 		try {
-			String stringKey = this.generateKey(key);
-			result = jedis.scard(stringKey);
+			byte[] rawKey = this.generateKey(key);
+			result = jedis.scard(rawKey);
 		} finally {
 			this.pool.returnResource(jedis);
 		}
@@ -64,8 +64,8 @@ public class RedisSetMultiMapState<K, V> extends AbstractRedisState<V> implement
 		Jedis jedis = this.pool.getResource();
 		long result;
 		try {
-			String stringKey = this.generateKey(key);
-			result = jedis.sadd(stringKey, new String(this.serializer.serialize(value)));
+			byte[] rawKey = this.generateKey(key);
+			result = jedis.sadd(rawKey, this.serializer.serialize(value));
 		} finally {
 			this.pool.returnResource(jedis);
 		}
@@ -80,13 +80,13 @@ public class RedisSetMultiMapState<K, V> extends AbstractRedisState<V> implement
 
 		Jedis jedis = this.pool.getResource();
 		try {
-			String stringKey = this.generateKey(key);
-			Set<String> resultsAsString = jedis.smembers(stringKey);
-			for (String result : resultsAsString) {
-				if (result == null || result.isEmpty()) {
+			byte[] rawKey = this.generateKey(key);
+			Set<byte[]> rawResults = jedis.smembers(rawKey);
+			for (byte[] result : rawResults) {
+				if (result == null) {
 					results.add(null);
 				} else {
-					results.add(this.serializer.deserialize(result.getBytes()));
+					results.add(this.serializer.deserialize(result));
 				}
 			}
 		} finally {

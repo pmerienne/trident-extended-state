@@ -52,8 +52,8 @@ public class RedisSortedSetMultiMapState<K, V> extends AbstractRedisState<V> imp
 		Jedis jedis = this.pool.getResource();
 		long result;
 		try {
-			String stringKey = this.generateKey(key);
-			result = jedis.zcard(stringKey);
+			byte[] rawKey = this.generateKey(key);
+			result = jedis.zcard(rawKey);
 		} finally {
 			this.pool.returnResource(jedis);
 		}
@@ -66,8 +66,8 @@ public class RedisSortedSetMultiMapState<K, V> extends AbstractRedisState<V> imp
 		Jedis jedis = this.pool.getResource();
 		long result;
 		try {
-			String stringKey = this.generateKey(key);
-			result = jedis.zadd(stringKey, value.getScore(), new String(this.serializer.serialize(value.getValue())));
+			byte[] rawKey = this.generateKey(key);
+			result = jedis.zadd(rawKey, value.getScore(), this.serializer.serialize(value.getValue()));
 		} finally {
 			this.pool.returnResource(jedis);
 		}
@@ -82,8 +82,8 @@ public class RedisSortedSetMultiMapState<K, V> extends AbstractRedisState<V> imp
 
 		Jedis jedis = this.pool.getResource();
 		try {
-			String stringKey = this.generateKey(key);
-			Set<Tuple> results = jedis.zrevrangeWithScores(stringKey, 0, count - 1);
+			byte[] rawKey = this.generateKey(key);
+			Set<Tuple> results = jedis.zrevrangeWithScores(rawKey, 0, count - 1);
 			for (Tuple result : results) {
 				scoredValues.add(new ScoredValue<V>(result.getScore(), this.serializer.deserialize(result.getBinaryElement())));
 			}
@@ -100,8 +100,8 @@ public class RedisSortedSetMultiMapState<K, V> extends AbstractRedisState<V> imp
 
 		Jedis jedis = this.pool.getResource();
 		try {
-			String stringKey = this.generateKey(key);
-			score = jedis.zscore(stringKey, new String(this.serializer.serialize(value)));
+			byte[] rawKey = this.generateKey(key);
+			score = jedis.zscore(rawKey, this.serializer.serialize(value));
 		} finally {
 			this.pool.returnResource(jedis);
 		}

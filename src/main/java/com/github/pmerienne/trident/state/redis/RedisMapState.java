@@ -51,7 +51,7 @@ public class RedisMapState<T> extends AbstractRedisState<T> implements MapState<
 		List<T> results = new ArrayList<T>();
 
 		// Create redis String keys
-		String[] stringKeys = new String[keys.size()];
+		byte[][] stringKeys = new byte[keys.size()][];
 		for (int i = 0; i < keys.size(); i++) {
 			stringKeys[i] = this.generateKey(keys.get(i));
 		}
@@ -59,12 +59,12 @@ public class RedisMapState<T> extends AbstractRedisState<T> implements MapState<
 		// Call redis server
 		Jedis jedis = this.pool.getResource();
 		try {
-			List<String> resultsAsString = jedis.mget(stringKeys);
-			for (String result : resultsAsString) {
-				if (result == null || result.isEmpty()) {
+			List<byte[]> rawResults = jedis.mget(stringKeys);
+			for (byte[] result : rawResults) {
+				if (result == null) {
 					results.add(null);
 				} else {
-					results.add(this.serializer.deserialize(result.getBytes()));
+					results.add(this.serializer.deserialize(result));
 				}
 			}
 		} finally {
@@ -76,10 +76,10 @@ public class RedisMapState<T> extends AbstractRedisState<T> implements MapState<
 
 	@Override
 	public void multiPut(List<List<Object>> keys, List<T> vals) {
-		String[] keyValues = new String[keys.size() * 2];
+		byte[][] keyValues = new byte[keys.size() * 2][];
 		for (int i = 0; i < keys.size(); i++) {
 			keyValues[i * 2] = this.generateKey(keys.get(i));
-			keyValues[i * 2 + 1] = new String(this.serializer.serialize(vals.get(i)));
+			keyValues[i * 2 + 1] = this.serializer.serialize(vals.get(i));
 		}
 
 		// Call redis server
