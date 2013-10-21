@@ -15,47 +15,48 @@
  */
 package com.github.pmerienne.trident.state.serializer;
 
-import java.io.ByteArrayOutputStream;
+import java.nio.ByteBuffer;
 
 import storm.trident.state.Serializer;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
-import com.github.pmerienne.trident.state.util.StringHexUtil;
 
 public class KryoValueSerializer<T> implements Serializer<T> {
 
 	private static final long serialVersionUID = 1689053104987281146L;
 
-	private Kryo kryo;
+	private final Kryo kryo;
+	private final int capacity;
 
 	public KryoValueSerializer() {
-		this.kryo = new Kryo();
+		this(new Kryo(), 16 * 1024);
+	}
+
+	public KryoValueSerializer(int capacity) {
+		this(new Kryo(), capacity);
+	}
+
+	public KryoValueSerializer(Kryo kryo, int capacity) {
+		this.kryo = kryo;
+		this.capacity = capacity;
 	}
 
 	@Override
 	public byte[] serialize(T obj) {
-		ByteArrayOutputStream stream = new ByteArrayOutputStream();
-		Output output = new Output(stream);
+		byte[] buffer = ByteBuffer.allocate(capacity).array();
+		Output output = new Output(buffer);
 
 		this.kryo.writeClassAndObject(output, obj);
 		output.close();
 
-		byte[] buffer = stream.toByteArray();
-
-		// Trick to avoid serialization problem!
-		String data = StringHexUtil.toHexString(buffer);
-		return data.getBytes();
+		return buffer;
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public T deserialize(byte[] bytes) {
-		// Trick to avoid serialization problem!
-		String data = new String(bytes);
-		bytes = StringHexUtil.fromHexString(data);
-
 		Input input = new Input(bytes);
 		Object obj = this.kryo.readClassAndObject(input);
 		return (T) obj;
