@@ -19,19 +19,17 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.UUID;
 
 import redis.clients.jedis.Jedis;
-import storm.trident.state.Serializer;
 import storm.trident.state.State;
 import backtype.storm.task.IMetricsContext;
 
 import com.github.pmerienne.trident.state.ExtendedStateFactory;
 import com.github.pmerienne.trident.state.SparseMatrixState;
-import com.google.common.base.Function;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Sets;
 
 public class RedisSparseMatrixState<T> extends AbstractRedisState<T> implements SparseMatrixState<T> {
 
@@ -116,8 +114,13 @@ public class RedisSparseMatrixState<T> extends AbstractRedisState<T> implements 
 
 			byte[] columnKey = this.getColumnKey(i);
 			Map<byte[], byte[]> serializedResults = jedis.hgetAll(columnKey);
+			
+			Map<Long, T> results = new HashMap<Long, T>(serializedResults.size());
+			for(Entry<byte[], byte[]> entry : serializedResults.entrySet()) {
+				results.put(Long.parseLong(new String(entry.getKey())), this.serializer.deserialize(entry.getValue()));
+			}
 
-			SparseVector<T> column = new RedisSparseVector<T>(serializedResults, serializer);
+			SparseVector<T> column = new RedisSparseVector<T>(results);
 			return column;
 		} finally {
 			this.pool.returnResource(jedis);
@@ -130,8 +133,13 @@ public class RedisSparseMatrixState<T> extends AbstractRedisState<T> implements 
 		try {
 			byte[] rowKey = this.getRowKey(j);
 			Map<byte[], byte[]> serializedResults = jedis.hgetAll(rowKey);
-
-			SparseVector<T> row = new RedisSparseVector<T>(serializedResults, serializer);
+			
+			Map<Long, T> results = new HashMap<Long, T>(serializedResults.size());
+			for(Entry<byte[], byte[]> entry : serializedResults.entrySet()) {
+				results.put(Long.parseLong(new String(entry.getKey())), this.serializer.deserialize(entry.getValue()));
+			}
+			
+			SparseVector<T> row = new RedisSparseVector<T>(results);
 			return row;
 		} finally {
 			this.pool.returnResource(jedis);
@@ -180,58 +188,33 @@ public class RedisSparseMatrixState<T> extends AbstractRedisState<T> implements 
 		}
 	}
 
-	protected static class RedisSparseVector<T> implements SparseVector<T> {
+	public static class RedisSparseVector<T> extends TreeMap<Long, T> implements SparseVector<T> {
 
-		private static final long serialVersionUID = 3559058694806143009L;
-
-		private Map<byte[], byte[]> values = new HashMap<byte[], byte[]>();
-		protected Serializer<T> serializer;
+		private static final long serialVersionUID = -2504979784781091836L;
 
 		public RedisSparseVector() {
+			super();
 		}
 
-		public RedisSparseVector(Map<byte[], byte[]> values, Serializer<T> serializer) {
-			this.values = values;
-			this.serializer = serializer;
+		public RedisSparseVector(Map<Long, T> map) {
+			super(map);
 		}
 
 		@Override
 		public T get(long i) {
-			byte[] serializedValue = this.values.get(Long.toString(i).getBytes());
-			if (serializedValue == null) {
-				return null;
-			} else {
-				return this.serializer.deserialize(serializedValue);
-			}
+			return this.get(Long.valueOf(i));
 		}
 
 		@Override
 		public void set(long i, T value) {
-			byte[] key = Long.toString(i).getBytes();
-
-			if (value != null) {
-				byte[] serializedValue = this.serializer.serialize(value);
-				this.values.put(key, serializedValue);
-			} else {
-				this.values.remove(key);
-			}
+			this.put(i, value);
 		}
 
 		@Override
 		public Set<Long> indexes() {
-			return Sets.newTreeSet(Iterables.transform(this.values.keySet(), new Function<byte[], Long>() {
-				@Override
-				public Long apply(byte[] bytes) {
-					return Long.parseLong(new String(bytes));
-				}
-
-			}));
+			return this.keySet();
 		}
 
-		@Override
-		public int size() {
-			return this.values.size();
-		}
 	}
 
 }
