@@ -15,8 +15,6 @@
  */
 package com.github.pmerienne.trident.state.serializer;
 
-import java.nio.ByteBuffer;
-
 import storm.trident.state.Serializer;
 
 import com.esotericsoftware.kryo.Kryo;
@@ -28,30 +26,31 @@ public class KryoValueSerializer<T> implements Serializer<T> {
 	private static final long serialVersionUID = 1689053104987281146L;
 
 	private final Kryo kryo;
-	private final int capacity;
+	private final int initialBufferSize;
+	private final int maxBufferSize;
 
 	public KryoValueSerializer() {
-		this(new Kryo(), 16 * 1024);
+		this(new Kryo(), 256, 16 * 1024);
 	}
 
-	public KryoValueSerializer(int capacity) {
-		this(new Kryo(), capacity);
+	public KryoValueSerializer(int initialBufferSize, int maxBufferSize) {
+		this(new Kryo(), initialBufferSize, maxBufferSize);
 	}
 
-	public KryoValueSerializer(Kryo kryo, int capacity) {
+	public KryoValueSerializer(Kryo kryo, int initialBufferSize, int maxBufferSize) {
 		this.kryo = kryo;
-		this.capacity = capacity;
+		this.initialBufferSize = initialBufferSize;
+		this.maxBufferSize = maxBufferSize;
 	}
 
 	@Override
 	public byte[] serialize(T obj) {
-		byte[] buffer = ByteBuffer.allocate(capacity).array();
-		Output output = new Output(buffer);
+		Output output = new Output(initialBufferSize, maxBufferSize);
 
 		this.kryo.writeClassAndObject(output, obj);
 		output.close();
 
-		return buffer;
+		return output.getBuffer();
 	}
 
 	@Override

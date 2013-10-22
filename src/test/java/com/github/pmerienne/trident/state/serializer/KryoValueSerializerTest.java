@@ -36,5 +36,4 @@ public class KryoValueSerializerTest {
 		// Then
 		assertThat(deserialized).isEqualTo(expectedObject);
 	}
-
 }
