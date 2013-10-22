@@ -23,7 +23,7 @@ import org.apache.commons.lang.ObjectUtils;
 import redis.clients.jedis.Protocol;
 import storm.trident.state.Serializer;
 
-import com.github.pmerienne.trident.state.serializer.JsonValueSerializer;
+import com.github.pmerienne.trident.state.serializer.KryoValueSerializer;
 
 public class RedisConfig extends HashMap<String, String> {
 
@@ -43,7 +43,7 @@ public class RedisConfig extends HashMap<String, String> {
 	public final static String DEFAULT_PASSWORD = null;
 	public final static String DEFAULT_KEY_PREFIX = "state";
 	public final static String DEFAULT_KEY_SEPARATOR = ":";
-	public final static String DEFAULT_SERIALIZER = JsonValueSerializer.class.getName();
+	public final static String DEFAULT_SERIALIZER = KryoValueSerializer.class.getName();
 	private final static int DEFAULT_MAX_ACTIVE_CONNECTION = 100;
 
 	public RedisConfig() {
