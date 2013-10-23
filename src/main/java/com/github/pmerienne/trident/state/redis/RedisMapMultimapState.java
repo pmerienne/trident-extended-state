@@ -39,7 +39,7 @@ public class RedisMapMultimapState<K1, K2, V> extends AbstractRedisState<V> impl
 
 	public RedisMapMultimapState(String id, Map<String, Object> stormConfiguration) {
 		super(id, stormConfiguration);
-		this.keySerializer = SerializerFactory.<K2> createSerializer(stormConfiguration);
+		this.keySerializer = SerializerFactory.<K2> createSerializer(config.getSerializerType(), stormConfiguration);
 	}
 
 	@Override

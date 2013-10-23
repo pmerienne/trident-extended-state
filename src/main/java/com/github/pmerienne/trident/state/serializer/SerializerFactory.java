@@ -19,7 +19,6 @@ import java.util.Map;
 
 import storm.trident.state.Serializer;
 
-import com.github.pmerienne.trident.state.redis.RedisConfig;
 import com.github.pmerienne.trident.state.redis.RedisConfig.SerializerType;
 
 public class SerializerFactory {
@@ -36,8 +35,7 @@ public class SerializerFactory {
 	}
 
 	@SuppressWarnings("rawtypes")
-	public static <T> Serializer<T> createSerializer(Map stormconfig) {
-		SerializerType type = RedisConfig.getFromStormConfig(stormconfig).getSerializerType();
+	public static <T> Serializer<T> createSerializer(SerializerType type, Map stormconfig) {
 		switch (type) {
 		case BINARY:
 			return new KryoValueSerializer<T>(stormconfig);

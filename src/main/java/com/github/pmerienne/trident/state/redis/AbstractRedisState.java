@@ -48,7 +48,7 @@ public abstract class AbstractRedisState<T> implements ExtendedState<T> {
 	public AbstractRedisState(String id, Map<String, Object> stormConfiguration) {
 		this.id = id;
 		this.config = RedisConfig.getFromStormConfig(stormConfiguration);
-		this.serializer = SerializerFactory.<T> createSerializer(stormConfiguration);
+		this.serializer = SerializerFactory.<T> createSerializer(config.getSerializerType(), stormConfiguration);
 
 		JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
 		jedisPoolConfig.setMaxActive(config.getMaxActiveConnection());
