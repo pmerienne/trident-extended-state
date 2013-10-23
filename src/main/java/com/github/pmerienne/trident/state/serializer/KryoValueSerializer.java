@@ -15,7 +15,10 @@
  */
 package com.github.pmerienne.trident.state.serializer;
 
+import java.util.Map;
+
 import storm.trident.state.Serializer;
+import backtype.storm.serialization.SerializationFactory;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
@@ -30,17 +33,25 @@ public class KryoValueSerializer<T> implements Serializer<T> {
 	private final int maxBufferSize;
 
 	public KryoValueSerializer() {
-		this(new Kryo(), 256, 16 * 1024);
+		this(256, 16 * 1024);
 	}
 
 	public KryoValueSerializer(int initialBufferSize, int maxBufferSize) {
-		this(new Kryo(), initialBufferSize, maxBufferSize);
-	}
-
-	public KryoValueSerializer(Kryo kryo, int initialBufferSize, int maxBufferSize) {
-		this.kryo = kryo;
 		this.initialBufferSize = initialBufferSize;
 		this.maxBufferSize = maxBufferSize;
+		this.kryo = new Kryo();
+	}
+
+	@SuppressWarnings("rawtypes")
+	public KryoValueSerializer(Map conf) {
+		this(conf, 256, 16 * 1024);
+	}
+
+	@SuppressWarnings("rawtypes")
+	public KryoValueSerializer(Map conf, int initialBufferSize, int maxBufferSize) {
+		this.initialBufferSize = initialBufferSize;
+		this.maxBufferSize = maxBufferSize;
+		this.kryo = SerializationFactory.getKryo(conf);
 	}
 
 	@Override

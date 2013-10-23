@@ -17,8 +17,6 @@ package com.github.pmerienne.trident.state.memory;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
 import java.util.UUID;
 
 import storm.trident.state.State;
@@ -59,13 +57,13 @@ public class MemorySparseMatrixState<T> extends NonTransactionalMemoryMapState<M
 	@Override
 	public SparseVector<T> getColumn(long i) {
 		Map<Long, T> column = MapStateUtil.getSingle(this, COLUMN_KEY + i);
-		return new MemorySparseVector<T>(column);
+		return new SparseVector<T>(column);
 	}
 
 	@Override
 	public SparseVector<T> getRow(long j) {
 		Map<Long, T> row = MapStateUtil.getSingle(this, ROW_KEY + j);
-		return new MemorySparseVector<T>(row);
+		return new SparseVector<T>(row);
 	}
 
 	public static class Factory<T> implements ExtendedStateFactory<MemorySparseMatrixState<T>> {
@@ -88,34 +86,5 @@ public class MemorySparseMatrixState<T> extends NonTransactionalMemoryMapState<M
 			State state = new MemorySparseMatrixState(this.id);
 			return state;
 		}
-	}
-
-	public static class MemorySparseVector<T> extends TreeMap<Long, T> implements SparseVector<T> {
-
-		private static final long serialVersionUID = -2504979784781091836L;
-
-		public MemorySparseVector() {
-			super();
-		}
-
-		public MemorySparseVector(Map<Long, T> map) {
-			super(map);
-		}
-
-		@Override
-		public T get(long i) {
-			return this.get(Long.valueOf(i));
-		}
-
-		@Override
-		public void set(long i, T value) {
-			this.put(i, value);
-		}
-
-		@Override
-		public Set<Long> indexes() {
-			return this.keySet();
-		}
-
 	}
 }

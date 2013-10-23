@@ -26,6 +26,7 @@ import backtype.storm.task.IMetricsContext;
 
 import com.github.pmerienne.trident.state.ExtendedStateFactory;
 import com.github.pmerienne.trident.state.MapMultimapState;
+import com.github.pmerienne.trident.state.serializer.SerializerFactory;
 
 public class RedisMapMultimapState<K1, K2, V> extends AbstractRedisState<V> implements MapMultimapState<K1, K2, V> {
 
@@ -33,12 +34,12 @@ public class RedisMapMultimapState<K1, K2, V> extends AbstractRedisState<V> impl
 
 	public RedisMapMultimapState(String id) {
 		super(id);
-		this.keySerializer = config.<K2> getSerializer();
+		this.keySerializer = SerializerFactory.<K2> createSerializer(config.getSerializerType());
 	}
 
-	public RedisMapMultimapState(String id, RedisConfig config) {
-		super(id, config);
-		this.keySerializer = config.<K2> getSerializer();
+	public RedisMapMultimapState(String id, Map<String, Object> stormConfiguration) {
+		super(id, stormConfiguration);
+		this.keySerializer = SerializerFactory.<K2> createSerializer(stormConfiguration);
 	}
 
 	@Override
@@ -117,10 +118,10 @@ public class RedisMapMultimapState<K1, K2, V> extends AbstractRedisState<V> impl
 			this.id = id;
 		}
 
-		@SuppressWarnings("rawtypes")
+		@SuppressWarnings({ "rawtypes", "unchecked" })
 		@Override
 		public State makeState(Map conf, IMetricsContext metrics, int partitionIndex, int numPartitions) {
-			State state = new RedisMapMultimapState(this.id, new RedisConfig(conf));
+			State state = new RedisMapMultimapState(this.id, conf);
 			return state;
 		}
 	}

@@ -18,16 +18,13 @@ package com.github.pmerienne.trident.state.redis;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.lang.ObjectUtils;
-
 import redis.clients.jedis.Protocol;
-import storm.trident.state.Serializer;
 
-import com.github.pmerienne.trident.state.serializer.KryoValueSerializer;
-
-public class RedisConfig extends HashMap<String, String> {
+public class RedisConfig extends HashMap<String, Object> {
 
 	private static final long serialVersionUID = -1913847520446822065L;
+
+	public static final String STORM_CONFIG_KEY = "redis.state.config";
 
 	public static final String HOST = "redis.port";
 	public static final String PORT = "redis.host";
@@ -36,29 +33,21 @@ public class RedisConfig extends HashMap<String, String> {
 	public static final String KEY_SEPARATOR = "redis.key.separator";
 	public static final String TIMEOUT = "redis.timeout";
 	public static final String DATABASE = "redis.database";
-	public static final String SERIALIZER = "redis.serializer";
+	public static final String SERIALIZER_TYPE = "redis.serializer";
 	public static final String MAX_ACTIVE_CONNECTION = "redis.max.active.connection";
 
 	public final static String DEFAULT_HOST = "localhost";
 	public final static String DEFAULT_PASSWORD = null;
 	public final static String DEFAULT_KEY_PREFIX = "state";
 	public final static String DEFAULT_KEY_SEPARATOR = ":";
-	public final static String DEFAULT_SERIALIZER = KryoValueSerializer.class.getName();
+	public final static SerializerType DEFAULT_SERIALIZER = SerializerType.BINARY;
 	private final static int DEFAULT_MAX_ACTIVE_CONNECTION = 100;
 
 	public RedisConfig() {
 	}
 
-	public RedisConfig(Map<?, ?> conf) {
-		Object value;
-		for (Object key : conf.keySet()) {
-			value = conf.get(key);
-			put(key instanceof String ? (String) key : ObjectUtils.toString(key), value instanceof String ? (String) value : ObjectUtils.toString(value));
-		}
-	}
-
 	public String getHost() {
-		return getString(HOST, DEFAULT_HOST);
+		return get(HOST, DEFAULT_HOST);
 	}
 
 	public void setHost(String host) {
@@ -66,15 +55,15 @@ public class RedisConfig extends HashMap<String, String> {
 	}
 
 	public Integer getPort() {
-		return getInteger(PORT, Protocol.DEFAULT_PORT);
+		return get(PORT, Protocol.DEFAULT_PORT);
 	}
 
 	public void setPort(Integer port) {
-		put(PORT, Integer.toString(port));
+		put(PORT, port);
 	}
 
 	public String getPassword() {
-		return getString(PASSWORD, DEFAULT_PASSWORD);
+		return get(PASSWORD, DEFAULT_PASSWORD);
 	}
 
 	public void setPassword(String password) {
@@ -82,7 +71,7 @@ public class RedisConfig extends HashMap<String, String> {
 	}
 
 	public String getKeyPrefix() {
-		return getString(KEY_PREFIX, DEFAULT_KEY_PREFIX);
+		return get(KEY_PREFIX, DEFAULT_KEY_PREFIX);
 	}
 
 	public void setKeyPrefix(String keyPrefix) {
@@ -90,7 +79,7 @@ public class RedisConfig extends HashMap<String, String> {
 	}
 
 	public String getKeySeparator() {
-		return getString(KEY_SEPARATOR, DEFAULT_KEY_SEPARATOR);
+		return get(KEY_SEPARATOR, DEFAULT_KEY_SEPARATOR);
 	}
 
 	public void setKeySeparator(String keySeparator) {
@@ -98,50 +87,55 @@ public class RedisConfig extends HashMap<String, String> {
 	}
 
 	public Integer getTimeout() {
-		return getInteger(TIMEOUT, Protocol.DEFAULT_TIMEOUT);
+		return get(TIMEOUT, Protocol.DEFAULT_TIMEOUT);
 	}
 
 	public void setTimeout(Integer timeout) {
-		put(TIMEOUT, Integer.toString(timeout));
+		put(TIMEOUT, timeout);
 	}
 
 	public Integer getDatabase() {
-		return getInteger(DATABASE, Protocol.DEFAULT_DATABASE);
+		return get(DATABASE, Protocol.DEFAULT_DATABASE);
 	}
 
 	public void setDatabase(Integer database) {
-		put(DATABASE, Integer.toString(database));
+		put(DATABASE, database);
 	}
 
 	public Integer getMaxActiveConnection() {
-		return getInteger(MAX_ACTIVE_CONNECTION, DEFAULT_MAX_ACTIVE_CONNECTION);
+		return get(MAX_ACTIVE_CONNECTION, DEFAULT_MAX_ACTIVE_CONNECTION);
 	}
 
 	public void setMaxActiveConnection(Integer maxActiveConnection) {
-		put(MAX_ACTIVE_CONNECTION, Integer.toString(maxActiveConnection));
+		put(MAX_ACTIVE_CONNECTION, maxActiveConnection);
+	}
+
+	public SerializerType getSerializerType() {
+		return get(SERIALIZER_TYPE, DEFAULT_SERIALIZER);
+	}
+
+	public void setSerializer(SerializerType serializerType) {
+		put(SERIALIZER_TYPE, serializerType);
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> Serializer<T> getSerializer() {
-		String serializerClass = getString(SERIALIZER, DEFAULT_SERIALIZER);
-		try {
-			Class<Serializer<T>> clazz = (Class<Serializer<T>>) Class.forName(serializerClass);
-			return clazz.newInstance();
-		} catch (Exception e) {
-			// TODO : log
-			return null;
+	private <T> T get(String key, T defaultValue) {
+		return containsKey(key) ? ((T) get(key)) : defaultValue;
+	}
+
+	public static enum SerializerType {
+		BINARY, HUMAN_READABLE;
+	}
+	
+	@SuppressWarnings({ "rawtypes" })
+	public static RedisConfig getFromStormConfig(Map conf) {
+		RedisConfig redisConfig;
+		if(conf.containsKey(RedisConfig.STORM_CONFIG_KEY)) {
+			redisConfig = (RedisConfig) conf.get(RedisConfig.STORM_CONFIG_KEY);
+		} else {
+			redisConfig = new RedisConfig();
 		}
-	}
-
-	public void setSerializer(Class<Serializer<?>> serializerClass) {
-		put(SERIALIZER, serializerClass.getName());
-	}
-
-	private String getString(String key, String defaultValue) {
-		return containsKey(key) ? get(key) : defaultValue;
-	}
-
-	private Integer getInteger(String key, Integer defaultValue) {
-		return containsKey(key) ? Integer.parseInt(get(key)) : defaultValue;
+		
+		return redisConfig;
 	}
 }

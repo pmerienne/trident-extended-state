@@ -35,8 +35,8 @@ public class RedisSortedSetMultiMapState<K, V> extends AbstractRedisState<V> imp
 		super(id);
 	}
 
-	public RedisSortedSetMultiMapState(String id, RedisConfig config) {
-		super(id, config);
+	public RedisSortedSetMultiMapState(String id, Map<String, Object> stormConfiguration) {
+		super(id, stormConfiguration);
 	}
 
 	@Override
@@ -119,10 +119,10 @@ public class RedisSortedSetMultiMapState<K, V> extends AbstractRedisState<V> imp
 			this.id = id;
 		}
 
-		@SuppressWarnings("rawtypes")
+		@SuppressWarnings({ "rawtypes", "unchecked" })
 		@Override
 		public State makeState(Map conf, IMetricsContext metrics, int partitionIndex, int numPartitions) {
-			State state = new RedisSortedSetMultiMapState(this.id, new RedisConfig(conf));
+			State state = new RedisSortedSetMultiMapState(this.id, conf);
 			return state;
 		}
 	}

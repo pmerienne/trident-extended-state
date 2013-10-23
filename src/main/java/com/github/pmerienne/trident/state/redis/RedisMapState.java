@@ -34,8 +34,8 @@ public class RedisMapState<T> extends AbstractRedisState<T> implements MapState<
 		super(id);
 	}
 
-	public RedisMapState(String id, RedisConfig config) {
-		super(id, config);
+	public RedisMapState(String id, Map<String, Object> stormConfiguration) {
+		super(id, stormConfiguration);
 	}
 
 	@Override
@@ -120,10 +120,10 @@ public class RedisMapState<T> extends AbstractRedisState<T> implements MapState<
 			this.id = id;
 		}
 
-		@SuppressWarnings("rawtypes")
+		@SuppressWarnings({ "rawtypes", "unchecked" })
 		@Override
 		public State makeState(Map conf, IMetricsContext metrics, int partitionIndex, int numPartitions) {
-			State state = new RedisMapState(this.id, new RedisConfig(conf));
+			State state = new RedisMapState(this.id, conf);
 			return state;
 		}
 	}

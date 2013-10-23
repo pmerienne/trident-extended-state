@@ -16,7 +16,9 @@
 package com.github.pmerienne.trident.state;
 
 import java.io.Serializable;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 public interface SparseMatrixState<T> extends ExtendedState<T> {
 
@@ -61,34 +63,29 @@ public interface SparseMatrixState<T> extends ExtendedState<T> {
 	 */
 	SparseVector<T> getRow(long j);
 
-	public static interface SparseVector<T> extends Serializable {
+	public static class SparseVector<T> extends TreeMap<Long, T> implements Serializable {
 
-		/**
-		 * Gets a specific value
-		 * 
-		 * @param i
-		 *            value index
-		 * @return the value or <code>null</code> if no value was found
-		 */
-		T get(long i);
+		private static final long serialVersionUID = -2504979784781091836L;
 
-		/**
-		 * Sets/Replace a specific value
-		 * 
-		 * @param i
-		 *            value index
-		 * @param value
-		 *            the new value
-		 */
-		void set(long i, T value);
+		public SparseVector() {
+			super();
+		}
 
-		/**
-		 * Returns a {@link Set} of the present indexes (ordered ASC)
-		 * 
-		 * @return
-		 */
-		Set<Long> indexes();
+		public SparseVector(Map<Long, T> map) {
+			super(map);
+		}
 
-		int size();
+		public T get(long i) {
+			return this.get(Long.valueOf(i));
+		}
+
+		public void set(long i, T value) {
+			this.put(i, value);
+		}
+
+		public Set<Long> indexes() {
+			return this.keySet();
+		}
+
 	}
 }

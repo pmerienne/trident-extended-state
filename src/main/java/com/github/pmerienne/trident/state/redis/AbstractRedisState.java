@@ -16,6 +16,7 @@
 package com.github.pmerienne.trident.state.redis;
 
 import java.util.List;
+import java.util.Map;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
@@ -23,6 +24,7 @@ import redis.clients.jedis.JedisPoolConfig;
 import storm.trident.state.Serializer;
 
 import com.github.pmerienne.trident.state.ExtendedState;
+import com.github.pmerienne.trident.state.serializer.SerializerFactory;
 
 public abstract class AbstractRedisState<T> implements ExtendedState<T> {
 
@@ -33,18 +35,24 @@ public abstract class AbstractRedisState<T> implements ExtendedState<T> {
 
 	protected final Serializer<T> serializer;
 
-	public AbstractRedisState(String id, RedisConfig config) {
+	public AbstractRedisState(String id) {
 		this.id = id;
-		this.config = config;
-		this.serializer = config.<T> getSerializer();
+		this.config = new RedisConfig();
+		this.serializer = SerializerFactory.<T> createSerializer(config.getSerializerType());
 
 		JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
 		jedisPoolConfig.setMaxActive(config.getMaxActiveConnection());
 		this.pool = new JedisPool(jedisPoolConfig, config.getHost(), config.getPort(), config.getTimeout(), null, config.getDatabase());
 	}
 
-	public AbstractRedisState(String id) {
-		this(id, new RedisConfig());
+	public AbstractRedisState(String id, Map<String, Object> stormConfiguration) {
+		this.id = id;
+		this.config = RedisConfig.getFromStormConfig(stormConfiguration);
+		this.serializer = SerializerFactory.<T> createSerializer(stormConfiguration);
+
+		JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
+		jedisPoolConfig.setMaxActive(config.getMaxActiveConnection());
+		this.pool = new JedisPool(jedisPoolConfig, config.getHost(), config.getPort(), config.getTimeout(), null, config.getDatabase());
 	}
 
 	protected byte[] generateKey() {

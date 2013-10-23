@@ -17,10 +17,6 @@ package com.github.pmerienne.trident.state;
 
 import static org.fest.assertions.Assertions.assertThat;
 
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.math.RandomUtils;
 import org.junit.Test;
@@ -66,7 +62,7 @@ public abstract class SparseMatrixStateTest {
 		SparseVector<TestValue> actualColumn = this.state.getColumn(i);
 
 		// Then
-		SparseVector<TestValue> expectedColumn = new HashMapSparseVector<TestValue>();
+		SparseVector<TestValue> expectedColumn = new SparseVector<TestValue>();
 		expectedColumn.set(j1, expectedValue1);
 		expectedColumn.set(j2, expectedValue2);
 		expectedColumn.set(j3, expectedValue3);
@@ -93,41 +89,12 @@ public abstract class SparseMatrixStateTest {
 		SparseVector<TestValue> actualColumn = this.state.getRow(j);
 
 		// Then
-		SparseVector<TestValue> expectedColumn = new HashMapSparseVector<TestValue>();
+		SparseVector<TestValue> expectedColumn = new SparseVector<TestValue>();
 		expectedColumn.set(i1, expectedValue1);
 		expectedColumn.set(i2, expectedValue2);
 		expectedColumn.set(i3, expectedValue3);
 
 		assertThat(SparseVectorComparator.areEquals(actualColumn, expectedColumn)).isTrue();
-	}
-
-	public static class HashMapSparseVector<T> implements SparseVector<T> {
-
-		private static final long serialVersionUID = 1L;
-
-		private Map<Long, T> values = new TreeMap<Long, T>();
-
-		public T get(long i) {
-			return this.values.get(i);
-		}
-
-		public void set(long i, T value) {
-			this.values.put(i, value);
-		}
-
-		public Set<Long> indexes() {
-			return this.values.keySet();
-		}
-
-		@Override
-		public int size() {
-			return this.values.size();
-		}
-
-		@Override
-		public String toString() {
-			return "SparseVector [values=" + values + "]";
-		}
 	}
 
 	private static class SparseVectorComparator {

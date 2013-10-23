@@ -20,8 +20,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
-import java.util.TreeMap;
 import java.util.UUID;
 
 import redis.clients.jedis.Jedis;
@@ -51,8 +49,8 @@ public class RedisSparseMatrixState<T> extends AbstractRedisState<T> implements 
 		this.rowKey = rowKey;
 	}
 
-	public RedisSparseMatrixState(String id, RedisConfig config) {
-		super(id, config);
+	public RedisSparseMatrixState(String id, Map<String, Object> stormConfiguration) {
+		super(id, stormConfiguration);
 		this.columnKey = DEFAULT_COLUMN_KEY;
 		this.rowKey = DEFAULT_ROW_KEY;
 	}
@@ -114,13 +112,13 @@ public class RedisSparseMatrixState<T> extends AbstractRedisState<T> implements 
 
 			byte[] columnKey = this.getColumnKey(i);
 			Map<byte[], byte[]> serializedResults = jedis.hgetAll(columnKey);
-			
+
 			Map<Long, T> results = new HashMap<Long, T>(serializedResults.size());
-			for(Entry<byte[], byte[]> entry : serializedResults.entrySet()) {
+			for (Entry<byte[], byte[]> entry : serializedResults.entrySet()) {
 				results.put(Long.parseLong(new String(entry.getKey())), this.serializer.deserialize(entry.getValue()));
 			}
 
-			SparseVector<T> column = new RedisSparseVector<T>(results);
+			SparseVector<T> column = new SparseVector<T>(results);
 			return column;
 		} finally {
 			this.pool.returnResource(jedis);
@@ -133,13 +131,13 @@ public class RedisSparseMatrixState<T> extends AbstractRedisState<T> implements 
 		try {
 			byte[] rowKey = this.getRowKey(j);
 			Map<byte[], byte[]> serializedResults = jedis.hgetAll(rowKey);
-			
+
 			Map<Long, T> results = new HashMap<Long, T>(serializedResults.size());
-			for(Entry<byte[], byte[]> entry : serializedResults.entrySet()) {
+			for (Entry<byte[], byte[]> entry : serializedResults.entrySet()) {
 				results.put(Long.parseLong(new String(entry.getKey())), this.serializer.deserialize(entry.getValue()));
 			}
-			
-			SparseVector<T> row = new RedisSparseVector<T>(results);
+
+			SparseVector<T> row = new SparseVector<T>(results);
 			return row;
 		} finally {
 			this.pool.returnResource(jedis);
@@ -180,41 +178,12 @@ public class RedisSparseMatrixState<T> extends AbstractRedisState<T> implements 
 			this.id = id;
 		}
 
-		@SuppressWarnings("rawtypes")
+		@SuppressWarnings({ "rawtypes", "unchecked" })
 		@Override
 		public State makeState(Map conf, IMetricsContext metrics, int partitionIndex, int numPartitions) {
-			State state = new RedisSparseMatrixState(this.id, new RedisConfig(conf));
+			State state = new RedisSparseMatrixState(this.id, conf);
 			return state;
 		}
-	}
-
-	public static class RedisSparseVector<T> extends TreeMap<Long, T> implements SparseVector<T> {
-
-		private static final long serialVersionUID = -2504979784781091836L;
-
-		public RedisSparseVector() {
-			super();
-		}
-
-		public RedisSparseVector(Map<Long, T> map) {
-			super(map);
-		}
-
-		@Override
-		public T get(long i) {
-			return this.get(Long.valueOf(i));
-		}
-
-		@Override
-		public void set(long i, T value) {
-			this.put(i, value);
-		}
-
-		@Override
-		public Set<Long> indexes() {
-			return this.keySet();
-		}
-
 	}
 
 }
