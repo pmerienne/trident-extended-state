@@ -30,6 +30,6 @@ public class MemorySparseMatrixStateTest extends SparseMatrixStateTest {
 
 	@After
 	public void cleanup() {
-		NonTransactionalMemoryMapState.MemoryMapStateBacking.clearAll();
+		AbstractMemoryState.MemoryMapStateBacking.clearAll();
 	}
 }

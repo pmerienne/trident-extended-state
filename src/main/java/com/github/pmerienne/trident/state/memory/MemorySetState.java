@@ -27,7 +27,7 @@ import backtype.storm.task.IMetricsContext;
 import com.github.pmerienne.trident.state.ExtendedStateFactory;
 import com.github.pmerienne.trident.state.SetState;
 
-public class MemorySetState<T> extends NonTransactionalMemoryMapState<Set<T>> implements SetState<T> {
+public class MemorySetState<T> extends AbstractMemoryState<Set<T>> implements SetState<T> {
 
 	public MemorySetState(String id) {
 		super(id);

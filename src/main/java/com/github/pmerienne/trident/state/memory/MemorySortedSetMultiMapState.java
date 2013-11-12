@@ -30,7 +30,7 @@ import com.github.pmerienne.trident.state.SortedSetMultiMapState;
 import com.github.pmerienne.trident.state.SortedSetMultiMapState.ScoredValue;
 import com.github.pmerienne.trident.state.util.MapStateUtil;
 
-public class MemorySortedSetMultiMapState<K, T> extends NonTransactionalMemoryMapState<TreeSet<ScoredValue<T>>> implements SortedSetMultiMapState<K, T> {
+public class MemorySortedSetMultiMapState<K, T> extends AbstractMemoryState<TreeSet<ScoredValue<T>>> implements SortedSetMultiMapState<K, T> {
 
 	public MemorySortedSetMultiMapState(String id) {
 		super(id);

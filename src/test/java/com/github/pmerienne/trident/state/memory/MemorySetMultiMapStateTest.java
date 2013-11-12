@@ -30,6 +30,6 @@ public class MemorySetMultiMapStateTest extends SetMultiMapStateTest {
 
 	@After
 	public void cleanup() {
-		NonTransactionalMemoryMapState.MemoryMapStateBacking.clearAll();
+		AbstractMemoryState.MemoryMapStateBacking.clearAll();
 	}
 }

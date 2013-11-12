@@ -37,12 +37,12 @@ import backtype.storm.task.IMetricsContext;
 import backtype.storm.tuple.Values;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public class NonTransactionalMemoryMapState<T> implements Snapshottable<T>, ITupleCollection, MapState<T> {
+public class AbstractMemoryState<T> implements Snapshottable<T>, ITupleCollection, MapState<T> {
 
 	MemoryMapStateBacking<T> _backing;
 	SnapshottableMap<T> _delegate;
 
-	public NonTransactionalMemoryMapState(String id) {
+	public AbstractMemoryState(String id) {
 		_backing = new MemoryMapStateBacking(id);
 		_delegate = new SnapshottableMap(NonTransactionalMap.build(_backing), new Values("$MEMORY-MAP-STATE-GLOBAL$"));
 	}
@@ -94,7 +94,7 @@ public class NonTransactionalMemoryMapState<T> implements Snapshottable<T>, ITup
 
 		@Override
 		public State makeState(Map conf, IMetricsContext metrics, int partitionIndex, int numPartitions) {
-			return new NonTransactionalMemoryMapState(_id);
+			return new AbstractMemoryState(_id);
 		}
 	}
 

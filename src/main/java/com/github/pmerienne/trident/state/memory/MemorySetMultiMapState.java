@@ -27,7 +27,7 @@ import com.github.pmerienne.trident.state.ExtendedStateFactory;
 import com.github.pmerienne.trident.state.SetMultiMapState;
 import com.github.pmerienne.trident.state.util.MapStateUtil;
 
-public class MemorySetMultiMapState<K, V> extends NonTransactionalMemoryMapState<Set<V>> implements SetMultiMapState<K, V> {
+public class MemorySetMultiMapState<K, V> extends AbstractMemoryState<Set<V>> implements SetMultiMapState<K, V> {
 
 	public MemorySetMultiMapState(String id) {
 		super(id);
