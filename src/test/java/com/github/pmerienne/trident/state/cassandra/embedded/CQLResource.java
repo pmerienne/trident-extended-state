@@ -37,6 +37,8 @@ public class CQLResource extends AbstractTestResource {
 
 	private final Session session;
 
+    private final int cqlPort;
+
 	/**
 	 * Initialize a new embedded Cassandra server
 	 * 
@@ -53,6 +55,7 @@ public class CQLResource extends AbstractTestResource {
 
 		setUpMemoryMeter();
 		server = new CQLEmbeddedServer(config);
+        cqlPort = CQLEmbeddedServer.getCqlPort();
 		session = server.getSession();
 	}
 
@@ -66,6 +69,7 @@ public class CQLResource extends AbstractTestResource {
 				KEYSPACE_NAME, DEFAULT_CASSANDRA_EMBEDDED_KEYSPACE_NAME, KEYSPACE_DURABLE_WRITE, false);
 		setUpMemoryMeter();
 		server = new CQLEmbeddedServer(config);
+        cqlPort = CQLEmbeddedServer.getCqlPort();
 		session = server.getSession();
 	}
 
@@ -77,6 +81,10 @@ public class CQLResource extends AbstractTestResource {
 	public Session getNativeSession() {
 		return session;
 	}
+
+    public int getCQLPort() {
+        return cqlPort;
+    }
 
 	private void setUpMemoryMeter() {
 		Instrumentation inst = mock(Instrumentation.class);

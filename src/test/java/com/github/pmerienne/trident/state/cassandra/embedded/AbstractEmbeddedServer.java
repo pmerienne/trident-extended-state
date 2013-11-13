@@ -40,6 +40,18 @@ public class AbstractEmbeddedServer {
 
 	private static final Pattern KEYSPACE_NAME_PATTERN = Pattern.compile("[a-zA-Z][_a-zA-Z0-9]{0,31}");
 
+    private static int cqlPort;
+
+    private static int thriftPort;
+
+    public static int getThriftPort() {
+        return thriftPort;
+    }
+
+    public static int getCqlPort() {
+        return cqlPort;
+    }
+
 	protected void startServer(Map<String, Object> parameters) {
 		String cassandraHost = System.getProperty(CASSANDRA_HOST);
 		if (StringUtils.isBlank(cassandraHost)) {
@@ -144,6 +156,8 @@ public class AbstractEmbeddedServer {
 		parameters.put(CASSANDRA_STORAGE_PORT, storagePort);
 		parameters.put(CASSANDRA_STORAGE_SSL_PORT, storageSSLPort);
 
+        AbstractEmbeddedServer.cqlPort = cqlPort;
+        AbstractEmbeddedServer.thriftPort = thriftPort;
 	}
 
 	private Integer extractAndValidatePort(Object port, String portLabel) {
