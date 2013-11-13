@@ -37,7 +37,7 @@ public class MapQueryTemplate extends AbstractQueryTemplate {
 	public <E> List<E> multiGet(String id, List<String> keys, Serializer<E> serializer) {
 		PreparedStatement ps = mapPreparedStatements.get(Operation.GET);
 		List<Row> rows = session.execute(ps.bind(id, keys)).all();
-		List<E> result = new ArrayList<>();
+		List<E> result = new ArrayList<E>();
 		for (Row row : rows) {
 			result.add(deserialize(row.getBytes("value"), serializer));
 		}
@@ -47,7 +47,7 @@ public class MapQueryTemplate extends AbstractQueryTemplate {
 	public <E> void multiPut(String id, List<String> keys, List<E> values, Serializer<E> serializer) {
 		PreparedStatement ps = mapPreparedStatements.get(Operation.INSERT);
 		BatchStatement batch = new BatchStatement();
-		List<ByteBuffer> serializedValues = new ArrayList<>();
+		List<ByteBuffer> serializedValues = new ArrayList<ByteBuffer>();
 
 		for (E value : values) {
 			serializedValues.add(serialize(value, serializer));

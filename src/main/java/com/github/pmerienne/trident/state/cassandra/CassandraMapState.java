@@ -67,9 +67,9 @@ public class CassandraMapState<T> extends AbstractCassandraState<T> implements M
 	}
 
 	private List<String> buildKeysString(List<List<Object>> keys) {
-		List<String> keysString = new ArrayList<>();
+		List<String> keysString = new ArrayList<String>();
 		for (List<Object> subKeys : keys) {
-			List<String> subKeysString = new ArrayList<>();
+			List<String> subKeysString = new ArrayList<String>();
 			for (Object subKey : subKeys) {
 				subKeysString.add(new String(jsonSerializer.serialize(subKey)));
 			}

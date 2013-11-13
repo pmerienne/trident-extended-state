@@ -70,7 +70,7 @@ public class SparseMatrixQueryTemplate extends AbstractQueryTemplate {
 	}
 
 	public <T> SparseVector<T> getColumnsFromRow(String id, long rowIndex, Serializer<T> serializer) {
-		SparseVector<T> result = new SparseVector<>();
+		SparseVector<T> result = new SparseVector<T>();
 
 		PreparedStatement ps = preparedStatements.get(Operation.GET_ROW);
 		List<Row> rows = session.execute(ps.bind(id, rowIndex)).all();
@@ -83,7 +83,7 @@ public class SparseMatrixQueryTemplate extends AbstractQueryTemplate {
 	}
 
 	public <T> SparseVector<T> getRowsFromColumn(String id, long columnIndex, Serializer<T> serializer) {
-		SparseVector<T> result = new SparseVector<>();
+		SparseVector<T> result = new SparseVector<T>();
 
 		PreparedStatement ps = preparedStatements.get(Operation.GET_COLUMN);
 		List<Row> rows = session.execute(ps.bind(id, columnIndex)).all();

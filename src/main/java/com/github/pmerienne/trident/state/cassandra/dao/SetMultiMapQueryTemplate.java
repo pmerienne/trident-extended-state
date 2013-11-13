@@ -65,7 +65,7 @@ public class SetMultiMapQueryTemplate extends AbstractQueryTemplate {
 	}
 
 	public <K, V> Set<V> get(String id, K key, Serializer<V> serializer) {
-		Set<V> result = new HashSet<>();
+		Set<V> result = new HashSet<V>();
 		ByteBuffer serializedKey = serialize(key, keySerializer);
 		PreparedStatement ps = preparedStatements.get(Operation.GET_ALL);
 
