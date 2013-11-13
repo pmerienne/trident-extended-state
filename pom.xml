@@ -34,7 +34,11 @@
 		<storm.version>0.8.2</storm.version>
 		<jedis.version>2.1.0</jedis.version>
 		<fastjson.version>1.1.36</fastjson.version>
-
+		<cassandra.version>2.0.2</cassandra.version>
+		<cassandra.driver.version>2.0.0-beta2</cassandra.driver.version>
+		
+		<fest.assert.version>2.0M8</fest.assert.version>
+		<fest.util.version>1.2.3</fest.util.version>
 		<junit.version>4.7</junit.version>
 		<mockito.version>1.9.0</mockito.version>
 		<slf4j.version>1.6.3</slf4j.version>
@@ -160,6 +164,13 @@
 			<artifactId>jedis</artifactId>
 			<version>${jedis.version}</version>
 		</dependency>
+		
+		<dependency>
+			<groupId>com.datastax.cassandra</groupId>
+			<artifactId>cassandra-driver-core</artifactId>
+			<version>${cassandra.driver.version}</version>
+	                <scope>provided</scope>
+		</dependency>
 
 		<dependency>
 			<groupId>com.alibaba</groupId>
@@ -185,6 +196,23 @@
 			<artifactId>fest-assert</artifactId>
 			<version>1.4</version>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.cassandra</groupId>
+			<artifactId>cassandra-all</artifactId>
+			<version>${cassandra.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.easytesting</groupId>
+			<artifactId>fest-assert-core</artifactId>
+			<version>${fest.assert.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.easytesting</groupId>
+			<artifactId>fest-util</artifactId>
+			<version>${fest.util.version}</version>
 		</dependency>
 
 		<!-- Log -->
