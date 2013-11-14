@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import redis.clients.jedis.Protocol;
+import com.github.pmerienne.trident.state.serializer.SerializerFactory.SerializerType;
 
 public class RedisConfig extends HashMap<String, Object> {
 
@@ -121,10 +122,6 @@ public class RedisConfig extends HashMap<String, Object> {
 	@SuppressWarnings("unchecked")
 	private <T> T get(String key, T defaultValue) {
 		return containsKey(key) ? ((T) get(key)) : defaultValue;
-	}
-
-	public static enum SerializerType {
-		BINARY, HUMAN_READABLE;
 	}
 	
 	@SuppressWarnings({ "rawtypes" })
