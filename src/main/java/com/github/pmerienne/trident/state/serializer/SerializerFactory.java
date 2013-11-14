@@ -19,8 +19,6 @@ import java.util.Map;
 
 import storm.trident.state.Serializer;
 
-import com.github.pmerienne.trident.state.redis.RedisConfig.SerializerType;
-
 public class SerializerFactory {
 
 	public static <T> Serializer<T> createSerializer(SerializerType type) {
@@ -45,4 +43,8 @@ public class SerializerFactory {
 			return new KryoValueSerializer<T>(stormconfig);
 		}
 	}
+
+    public static enum SerializerType {
+        BINARY, HUMAN_READABLE;
+    }
 }

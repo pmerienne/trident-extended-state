@@ -1,7 +1,7 @@
 package com.github.pmerienne.trident.state.serializer;
 
-import static com.github.pmerienne.trident.state.redis.RedisConfig.SerializerType.BINARY;
-import static com.github.pmerienne.trident.state.redis.RedisConfig.SerializerType.HUMAN_READABLE;
+import static com.github.pmerienne.trident.state.serializer.SerializerFactory.SerializerType.BINARY;
+import static com.github.pmerienne.trident.state.serializer.SerializerFactory.SerializerType.HUMAN_READABLE;
 import static com.github.pmerienne.trident.state.serializer.SerializerFactory.createSerializer;
 import static org.fest.assertions.Assertions.assertThat;
 
