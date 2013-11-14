@@ -16,26 +16,33 @@
 package com.github.pmerienne.trident.state.redis;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.UUID;
 
 import redis.clients.jedis.Jedis;
+import storm.trident.state.Serializer;
 import storm.trident.state.State;
-import storm.trident.state.ValueUpdater;
-import storm.trident.state.map.MapState;
 import backtype.storm.task.IMetricsContext;
 
 import com.github.pmerienne.trident.state.ExtendedStateFactory;
+import com.github.pmerienne.trident.state.MapState;
+import com.github.pmerienne.trident.state.serializer.SerializerFactory;
 
-public class RedisMapState<T> extends AbstractRedisState<T> implements MapState<T> {
+public class RedisMapState<K, V> extends AbstractRedisState<V> implements MapState<K, V> {
+
+	private final Serializer<K> keySerializer;
 
 	public RedisMapState(String id) {
 		super(id);
+		this.keySerializer = SerializerFactory.<K> createSerializer(config.getSerializerType());
 	}
 
 	public RedisMapState(String id, Map<String, Object> stormConfiguration) {
 		super(id, stormConfiguration);
+		this.keySerializer = SerializerFactory.<K> createSerializer(config.getSerializerType(), stormConfiguration);
 	}
 
 	@Override
@@ -47,19 +54,19 @@ public class RedisMapState<T> extends AbstractRedisState<T> implements MapState<
 	}
 
 	@Override
-	public List<T> multiGet(List<List<Object>> keys) {
-		List<T> results = new ArrayList<T>();
+	public List<V> multiGet(List<K> keys) {
+		List<V> results = new ArrayList<V>(keys.size());
 
-		// Create redis String keys
-		byte[][] stringKeys = new byte[keys.size()][];
-		for (int i = 0; i < keys.size(); i++) {
-			stringKeys[i] = this.generateKey(keys.get(i));
-		}
-
-		// Call redis server
 		Jedis jedis = this.pool.getResource();
 		try {
-			List<byte[]> rawResults = jedis.mget(stringKeys);
+			byte[] rawKey = this.generateKey();
+			byte[][] rawFields = new byte[keys.size()][];
+			for (int i = 0; i < keys.size(); i++) {
+				rawFields[i] = keySerializer.serialize(keys.get(i));
+			}
+
+			List<byte[]> rawResults = jedis.hmget(rawKey, rawFields);
+
 			for (byte[] result : rawResults) {
 				if (result == null) {
 					results.add(null);
@@ -75,38 +82,23 @@ public class RedisMapState<T> extends AbstractRedisState<T> implements MapState<
 	}
 
 	@Override
-	public void multiPut(List<List<Object>> keys, List<T> vals) {
-		byte[][] keyValues = new byte[keys.size() * 2][];
-		for (int i = 0; i < keys.size(); i++) {
-			keyValues[i * 2] = this.generateKey(keys.get(i));
-			keyValues[i * 2 + 1] = this.serializer.serialize(vals.get(i));
-		}
-
-		// Call redis server
+	public void multiPut(Map<K, V> values) {
 		Jedis jedis = this.pool.getResource();
 		try {
-			jedis.mset(keyValues);
+			byte[] rawKey = this.generateKey();
+
+			Map<byte[], byte[]> rawHash = new HashMap<byte[], byte[]>(values.size());
+			for (Entry<K, V> entry : values.entrySet()) {
+				rawHash.put(keySerializer.serialize(entry.getKey()), serializer.serialize(entry.getValue()));
+			}
+
+			jedis.hmset(rawKey, rawHash);
 		} finally {
 			this.pool.returnResource(jedis);
 		}
-
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	@Override
-	public List<T> multiUpdate(List<List<Object>> keys, List<ValueUpdater> updaters) {
-		List<T> curr = this.multiGet(keys);
-		List<T> ret = new ArrayList<T>(curr.size());
-		for (int i = 0; i < curr.size(); i++) {
-			T currVal = curr.get(i);
-			ValueUpdater<T> updater = updaters.get(i);
-			ret.add(updater.update(currVal));
-		}
-		this.multiPut(keys, ret);
-		return ret;
-	}
-
-	public static class Factory<T> implements ExtendedStateFactory<RedisMapState<T>> {
+	public static class Factory<K, V> implements ExtendedStateFactory<RedisMapState<K, V>> {
 
 		private static final long serialVersionUID = 4718043951532492603L;
 

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.pmerienne.trident.state.redis;
+package com.github.pmerienne.trident.state.memory;
 
 import org.junit.After;
 import org.junit.Before;
@@ -21,15 +21,15 @@ import org.junit.Before;
 import com.github.pmerienne.trident.state.MapStateTest;
 import com.github.pmerienne.trident.state.testing.TestValue;
 
-public class RedisMapStateTest extends MapStateTest {
+public class MemoryMapStateTest extends MapStateTest {
 
 	@Before
 	public void setup() {
-		this.state = new RedisMapState<String, TestValue>("test");
+		this.state = new MemoryMapState<String, TestValue>("test");
 	}
 
 	@After
 	public void cleanup() {
-		((AbstractRedisState<?>) this.state).flushAll();
+		MemoryMapState.clear();
 	}
 }

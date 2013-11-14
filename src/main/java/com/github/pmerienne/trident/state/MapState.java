@@ -13,23 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.pmerienne.trident.state.redis;
+package com.github.pmerienne.trident.state;
 
-import org.junit.After;
-import org.junit.Before;
+import java.util.List;
+import java.util.Map;
 
-import com.github.pmerienne.trident.state.MapStateTest;
-import com.github.pmerienne.trident.state.testing.TestValue;
+public interface MapState<K, V> extends ExtendedState<V> {
 
-public class RedisMapStateTest extends MapStateTest {
+	List<V> multiGet(List<K> keys);
 
-	@Before
-	public void setup() {
-		this.state = new RedisMapState<String, TestValue>("test");
-	}
+	void multiPut(Map<K, V> values);
 
-	@After
-	public void cleanup() {
-		((AbstractRedisState<?>) this.state).flushAll();
-	}
 }
