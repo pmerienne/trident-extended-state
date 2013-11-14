@@ -1,10 +1,9 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.github.pmerienne</groupId>
 	<artifactId>trident-extended-state</artifactId>
 	<version>0.0.3-SNAPSHOT</version>
-
-
 
 	<licenses>
 		<license>
@@ -19,8 +18,13 @@
 	<developers>
 		<developer>
 			<id>pmerienne</id>
-			<email>pmerienne@excilys.com</email>
+			<email>pierre.merienne@gmail.com</email>
 			<name>Pierre Merienne</name>
+		</developer>
+		
+		<developer>
+			<id>doanduyhai</id>
+			<name>DuyHai DOAN</name>
 		</developer>
 	</developers>
 
@@ -36,15 +40,12 @@
 		<fastjson.version>1.1.36</fastjson.version>
 		<cassandra.version>2.0.2</cassandra.version>
 		<cassandra.driver.version>2.0.0-beta2</cassandra.driver.version>
-		
-		<fest.assert.version>2.0M8</fest.assert.version>
-		<fest.util.version>1.2.3</fest.util.version>
+
+		<fest-assert.version>1.4</fest-assert.version>
 		<junit.version>4.7</junit.version>
 		<mockito.version>1.9.0</mockito.version>
 		<slf4j.version>1.6.3</slf4j.version>
 	</properties>
-
-
 
 	<repositories>
 		<!-- For storm -->
@@ -168,12 +169,12 @@
 			<artifactId>jedis</artifactId>
 			<version>${jedis.version}</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>com.datastax.cassandra</groupId>
 			<artifactId>cassandra-driver-core</artifactId>
 			<version>${cassandra.driver.version}</version>
-	                <scope>provided</scope>
+			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
@@ -196,12 +197,6 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.easytesting</groupId>
-			<artifactId>fest-assert</artifactId>
-			<version>1.4</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.apache.cassandra</groupId>
 			<artifactId>cassandra-all</artifactId>
 			<version>${cassandra.version}</version>
@@ -209,14 +204,9 @@
 		</dependency>
 		<dependency>
 			<groupId>org.easytesting</groupId>
-			<artifactId>fest-assert-core</artifactId>
-			<version>${fest.assert.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.easytesting</groupId>
-			<artifactId>fest-util</artifactId>
-			<version>${fest.util.version}</version>
+			<artifactId>fest-assert</artifactId>
+			<version>${fest-assert.version}</version>
+			<scope>test</scope>
 		</dependency>
 
 		<!-- Log -->
